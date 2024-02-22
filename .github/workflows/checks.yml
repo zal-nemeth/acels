@@ -1,0 +1,50 @@
+# Run unit tests, linters and style checks
+
+name: Run Tests, Linters and Style Checks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run Tests
+        if: always()
+        run: make action-pytest
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: testreport.xml
+
+      - name: Publish Coverage Results
+        uses: 5monkeys/cobertura-action@master
+        if: always()
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          minimum_coverage: 75
+
+      - name: Run Black Check
+        if: always()
+        run: make action-black
+
+      - name: Run isort Check
+        if: always()
+        run: make action-isort
+
+      - name: Run Pylint
+        if: always()
+        run: make action-pylint
