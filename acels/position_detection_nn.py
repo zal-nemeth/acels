@@ -229,7 +229,7 @@ model.summary()
 # Model Training
 # -----------------------------------------------------------------------------
 # Train model
-history_1 = model.fit(feature_train, target_train, epochs=3500, batch_size=64, validation_data=(feature_validate, target_validate))
+history_1 = model.fit(feature_train, target_train, epochs=4000, batch_size=64, validation_data=(feature_validate, target_validate))
 # Check Mean Absolute Error
 test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0) 
 print('Testing set Mean Abs Error: {:5.3f} mm'.format(test_mae))
@@ -309,7 +309,9 @@ actual_coordinates = target_test_og
 actual_coordinates_df = pd.DataFrame(actual_coordinates)
 pred_coordinates = denorm_data[['x', 'y', 'z']]
 
-actual_coordinates.to_csv("acels/test_coordinates.csv", index=False)
+total_test_data = pd.concat([feature_test_og, target_test_og], axis=1)
+
+total_test_data.to_csv("acels/test_coordinates.csv", index=False)
 pred_coordinates.to_csv("acels/predicted_coordinates.csv", index=False)
 
 x = actual_coordinates.iloc[:, 0]
