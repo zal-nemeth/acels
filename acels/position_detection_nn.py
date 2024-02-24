@@ -9,7 +9,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 from keras.layers import Dense
-
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # -----------------------------------------------------------------------------
 # Define functions
@@ -50,26 +50,33 @@ def denorm(x):
 
 def evaluate_regression_model(original_data, predicted_data):
     """
-    Evaluates a regression model using Mean Squared Error (MSE), Root Mean Squared Error (RMSE),
-    and a custom accuracy percentage based on the data range.
+    Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE), 
+    Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage 
+    based on the data range.
 
     Parameters:
     - original_data (numpy.ndarray or pandas.DataFrame): The actual values.
     - predicted_data (numpy.ndarray or pandas.DataFrame): The predicted values by the model.
 
     Returns:
-    - A dictionary containing MSE, RMSE, and custom accuracy percentage.
+    - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
         predicted_data = predicted_data.to_numpy()
     
-    # Calculate Mean Squared Error
-    mse = np.mean((original_data - predicted_data) ** 2)
+    # Calculate Mean Absolute Error
+    mae = mean_absolute_error(original_data, predicted_data)
     
-    # Convert to Root Mean Squared Error
+    # Calculate Mean Squared Error
+    mse = mean_squared_error(original_data, predicted_data)
+    
+    # Calculate Root Mean Squared Error
     rmse = np.sqrt(mse)
+    
+    # Calculate R-squared
+    r_squared = r2_score(original_data, predicted_data)
     
     # Estimate the range of the data
     data_range = np.max(original_data) - np.min(original_data)
@@ -80,8 +87,10 @@ def evaluate_regression_model(original_data, predicted_data):
     
     # Print and return the evaluation metrics
     evaluation_metrics = {
+        "MAE": mae,
         "MSE": mse,
         "RMSE": rmse,
+        "R²": r_squared,
         "Accuracy Percentage": accuracy_percentage
     }
     
@@ -89,6 +98,7 @@ def evaluate_regression_model(original_data, predicted_data):
         print(f"# {metric}: {value:.2f}")
     
     return evaluation_metrics
+
 
 def install_xxd():
     """
@@ -161,7 +171,9 @@ data32 = data.astype(np.float32)
 train_stats = data32.describe()
 train_stats = train_stats.transpose()
 
+# Print and save to csv for reuse in control software
 print(f"\nData Statistics: {train_stats}")
+train_stats.to_csv('acels/data_statistics.csv', index=True)
 
 # Separate Data into Feature and Target Variables
 # The `_og` suffix refers to the original data without normalization
@@ -217,7 +229,7 @@ model.summary()
 # Model Training
 # -----------------------------------------------------------------------------
 # Train model
-history_1 = model.fit(feature_train, target_train, epochs=2000, batch_size=64, validation_data=(feature_validate, target_validate))
+history_1 = model.fit(feature_train, target_train, epochs=3500, batch_size=64, validation_data=(feature_validate, target_validate))
 # Check Mean Absolute Error
 test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0) 
 print('Testing set Mean Abs Error: {:5.3f} mm'.format(test_mae))
@@ -287,33 +299,47 @@ norm_z2 = target_test_pred[:, 2]
 
 
 # Check model output values
+# Convert to dataframe for denormalization
 pred_df = pd.DataFrame(target_test_pred, columns = ['x','y','z'])
 
-denormed_data = denorm(pred_df)
-denormed_feature = denorm(feature)
-denormed_target = denorm(target)
+# denormed_target = denorm(target)
+denorm_data = denorm(pred_df)
 
-df_sensors = denormed_feature[['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8']]
-df_coordinates = denormed_target[['x', 'y', 'z']]
-coordinates2 = denormed_data[['x', 'y', 'z']]
+actual_coordinates = target_test_og
+actual_coordinates_df = pd.DataFrame(actual_coordinates)
+pred_coordinates = denorm_data[['x', 'y', 'z']]
 
-x = df_coordinates.iloc[:, 0]
-y = df_coordinates.iloc[:, 1]
-z = df_coordinates.iloc[:, 2]
-x2 = coordinates2.iloc[:, 0]
-y2 = coordinates2.iloc[:, 1]
-z2 = coordinates2.iloc[:, 2]
+actual_coordinates.to_csv("acels/test_coordinates.csv", index=False)
+pred_coordinates.to_csv("acels/predicted_coordinates.csv", index=False)
+
+x = actual_coordinates.iloc[:, 0]
+y = actual_coordinates.iloc[:, 1]
+z = actual_coordinates.iloc[:, 2]
+x2 = pred_coordinates.iloc[:, 0]
+y2 = pred_coordinates.iloc[:, 1]
+z2 = pred_coordinates.iloc[:, 2]
 
 eval_metrics_normed = evaluate_regression_model(target_test, target_test_pred)
-eval_metrics_og = evaluate_regression_model(target_test_og, coordinates2)
-model_accuracy_normed = eval_metrics_normed["Accuracy Percentage"]
-model_accuracy = eval_metrics_og["Accuracy Percentage"]
+eval_metrics_og = evaluate_regression_model(target_test_og, pred_coordinates)
+# model_accuracy_normed = eval_metrics_normed["Accuracy Percentage"]
+model_mae_normed = eval_metrics_normed["MAE"]
+model_mse_normed = eval_metrics_normed["MSE"]
+model_rmse_normed = eval_metrics_normed["RMSE"]
+model_r2_normed = eval_metrics_normed["R²"]
+# model_accuracy = eval_metrics_og["Accuracy Percentage"]
+model_mae = eval_metrics_og["MAE"]
+model_mse = eval_metrics_og["MSE"]
+model_rmse = eval_metrics_og["RMSE"]
+model_r2 = eval_metrics_og["R²"]
 
 # Adjusting titles, legends, and positioning of the accuracy text to improve clarity and avoid overlay
-fig, axs = plt.subplots(1, 2, figsize=(20, 7), subplot_kw={'projection': '3d'})
+fig, axs = plt.subplots(1, 2,
+                        figsize=(16, 7),
+                        subplot_kw={'projection': '3d'},
+                        gridspec_kw={'wspace': 0.1})
 
 # Normalized model predictions plot
-axs[0].scatter3D(norm_x, norm_y, norm_z, c='blue', s=15, label='Actual Values')
+axs[0].scatter3D(norm_x, norm_y, norm_z, marker='x', c='blue', s=15, label='Actual Values')
 axs[0].scatter3D(norm_x2, norm_y2, norm_z2, c='red', s=8, alpha=0.5, label='Model Predictions')
 axs[0].set_title('Normalized Model Predictions')
 axs[0].set_xlabel('X')
@@ -322,7 +348,7 @@ axs[0].set_zlabel('Z')
 axs[0].legend()
 
 # Denormalized model predictions plot
-axs[1].scatter3D(x, y, z, c='blue', s=15, label='Actual Values')
+axs[1].scatter3D(x, y, z, marker='x', c='blue', s=15, label='Actual Values')
 axs[1].scatter3D(x2, y2, z2, c='red', s=8, alpha=0.5, label='Model Predictions')
 axs[1].set_title('Denormalized Model Predictions')
 axs[1].set_xlabel('X (mm)')
@@ -330,20 +356,17 @@ axs[1].set_ylabel('Y (mm)')
 axs[1].set_zlabel('Z (mm)')
 axs[1].legend()
 
-# Repositioning text for MAE and accuracy to avoid overlay
-plt.subplots_adjust(bottom=0.2)
-fig.text(0.27,
-         0.1,
-         f'Normalized Model\nMAE: {test_mae:.3f} mm\nAccuracy: {model_accuracy_normed:.2f}%',
+# Adjusting text position closer to the plots and using a consistent formatting style for both metrics
+plt.subplots_adjust(bottom=0.15)
+fig.text(0.33, 0.05,
+         f'MAE: {model_mae_normed:.3f}, MSE: {model_mse_normed:.3f}, RMSE: {model_rmse_normed:.3f}, R²: {model_r2_normed:.3f}',
          ha='center',
          fontsize=12)
-fig.text(0.73,
-         0.1,
-         f'Denormalized Model\nMAE: {test_mae:.3f} mm (estimated)\nAccuracy: {model_accuracy:.2f}% (estimated)',
+fig.text(0.73, 0.05,
+         f'MAE: {model_mae:.3f} mm, MSE: {model_mse:.3f} mm², RMSE: {model_rmse:.3f} mm, R²: {model_r2:.3f}',
          ha='center',
          fontsize=12)
 
-plt.tight_layout()
 plt.savefig("acels/figures/model_eval.svg")
 plt.show()
 
