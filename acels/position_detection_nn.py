@@ -153,6 +153,7 @@ if not os.path.exists(MODELS_DIR):
 MODEL_TF = MODELS_DIR + 'model'
 MODEL_NO_QUANT_TFLITE = MODELS_DIR + 'model_no_quant.tflite'
 MODEL_TFLITE = MODELS_DIR + 'model.tflite'
+MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + 'model_no_quant.cc'
 MODEL_TFLITE_MICRO = MODELS_DIR + 'model.cc'
 
 # -----------------------------------------------------------------------------
@@ -229,7 +230,7 @@ model.summary()
 # Model Training
 # -----------------------------------------------------------------------------
 # Train model
-history_1 = model.fit(feature_train, target_train, epochs=4000, batch_size=64, validation_data=(feature_validate, target_validate))
+history_1 = model.fit(feature_train, target_train, epochs=2, batch_size=64, validation_data=(feature_validate, target_validate))
 # Check Mean Absolute Error
 test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0) 
 print('Testing set Mean Abs Error: {:5.3f} mm'.format(test_mae))
@@ -380,6 +381,10 @@ converter = tf.lite.TFLiteConverter.from_saved_model(MODEL_TF)
 model_no_quant_tflite = converter.convert()
 # Save the model to disk
 open(MODEL_NO_QUANT_TFLITE, "wb").write(model_no_quant_tflite)
+
+install_xxd()
+convert_model_to_c_source(MODEL_NO_QUANT_TFLITE, MODEL_NO_QUANT_TFLITE_MICRO)
+update_variable_names(MODEL_NO_QUANT_TFLITE_MICRO, MODEL_NO_QUANT_TFLITE)
 
 # Convert the model to the TensorFlow Lite format with quantization
 def representative_dataset():
