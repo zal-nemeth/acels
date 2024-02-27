@@ -100,7 +100,7 @@ def compare_datasets(original_csv, predicted_csv, existing=True):
 # Main
 #-------------------------------------------------------------------------------------------
 original_csv_path = 'acels/test_coordinates.csv'
-predicted_csv_path = 'acels/output_coordinates.csv'
+predicted_csv_path = 'acels/non_quantized_implementation_output.csv'
 metrics = compare_datasets(original_csv_path, predicted_csv_path, False)
 
 print(metrics)
