@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-def evaluate_regression_model(original_data, predicted_data):
+def evaluate_regression_model(original_data, predicted_data, data_name):
     """
     Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE), 
     Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage 
@@ -45,19 +45,20 @@ def evaluate_regression_model(original_data, predicted_data):
     
     # Print and return the evaluation metrics
     evaluation_metrics = {
-        "MAE": mae,
-        "MSE": mse,
-        "RMSE": rmse,
-        "R²": r_squared,
-        "Accuracy Percentage": accuracy_percentage
+        "MAE": (mae, "mm"),
+        "MSE": (mse, "mm²"),
+        "RMSE": (rmse, "mm"),
+        "R²": (r_squared, ""),
+        "Accuracy Percentage": (accuracy_percentage, "%")
     }
     
+    print(f"{data_name} metrics")
     for metric, value in evaluation_metrics.items():
-        print(f"# {metric}: {value:.2f}")
+        print(f"# {metric}: {value[0]:.3f} {value[1]}")
     
     return evaluation_metrics
 
-def compare_datasets(original_csv, predicted_csv, existing=True):
+def compare_datasets(original_csv, predicted_csv, data_name, existing=True):
     # Load the datasets
     original_data = pd.read_csv(original_csv, usecols=['x', 'y', 'z'])
     predicted_data = pd.read_csv(predicted_csv, usecols=['x', 'y', 'z'])
@@ -93,14 +94,34 @@ def compare_datasets(original_csv, predicted_csv, existing=True):
         ser.close()
 
     # Evaluate the regression model
-    evaluation_metrics = evaluate_regression_model(original_data, predicted_data)
+    evaluation_metrics = evaluate_regression_model(original_data, predicted_data, data_name)
     return evaluation_metrics
 
 #-------------------------------------------------------------------------------------------
 # Main
 #-------------------------------------------------------------------------------------------
-original_csv_path = 'acels/test_coordinates.csv'
-predicted_csv_path = 'acels/quantized_implementation_output.csv'
-metrics = compare_datasets(original_csv_path, predicted_csv_path, False)
+original_csv_path = "acels/test_coordinates.csv"
 
-print(metrics)
+# Full model Results
+full_model_pred = "acels/full_model_predictions.csv"
+
+# Non-quantized results
+non_quant_pred = "acels/non_quantized_predictions.csv"
+non_quant_impl_pred = "acels/non_quantized_implementation_output.csv"
+
+# Quantized results
+quant_pred = "acels/quantized_predictions.csv"
+quant_impl_pred = "acels/quantized_implementation_output.csv"
+
+metrics_full_model = compare_datasets(original_csv_path,
+                                      full_model_pred,
+                                      "Full model",
+                                      True)
+metrics_non_quant_pred_impl = compare_datasets(original_csv_path,
+                                               non_quant_impl_pred,
+                                               "Non-quantized implemented model",
+                                               True)
+metrics_quant_pred_impl = compare_datasets(original_csv_path,
+                                           quant_impl_pred,
+                                           "Quantized implemented model",
+                                           True)

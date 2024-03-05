@@ -161,7 +161,7 @@ MODEL_TFLITE_MICRO = MODELS_DIR + 'model.cc'
 # Data Processing
 # -----------------------------------------------------------------------------
 # Assign dataset to data variable
-data = pd.read_csv('acels/position_data_float_xyz_extended.csv')
+data = pd.read_csv('acels/data/position_data_float_xyz_extended.csv')
 
 num_rows = data.shape[0]
 # Check datatype

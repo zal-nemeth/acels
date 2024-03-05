@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 # Assuming fx_pred, fy_pred, fz_pred, tx_pred, ty_pred are defined elsewhere
 # and perform similar operations as their MATLAB counterparts
 
-data = pd.read_csv('acels/r_z_data_1A.csv')
+data = pd.read_csv('acels/data/r_z_data_1A.csv')
 
 points = data[['r', 'z']].values  # Input points (r, z)
 values_fx = data['Fx'].values  # Values to interpolate for Fx
