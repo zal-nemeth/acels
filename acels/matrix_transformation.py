@@ -68,7 +68,7 @@ def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
     
     for i, (cx, cy) in enumerate(zip(cxi, cyi)):
         r = np.sqrt((x - cx)**2 + (y - cy)**2)
-        print(f"R: {r}")
+        # print(f"R: {r}")
         theta_i = np.arctan2(y - cy, x - cx)
         
         f_x = interpolate_fx(r, z)
@@ -77,9 +77,9 @@ def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
         t_x = interpolate_tx(r, z)
         t_y = interpolate_ty(r, z)
         
-        print(f"Force X: {f_x}")
-        print(f"Force Y: {f_y}")
-        print(f"Force Z: {f_z}\n")
+        # print(f"Force X: {f_x}")
+        # print(f"Force Y: {f_y}")
+        # print(f"Force Z: {f_z}\n")
         
         A[:, i] = [np.cos(theta_i) * f_x, np.sin(theta_i) * f_y, f_z,
                    -np.sin(theta_i) * t_x, np.cos(theta_i) * t_y]
@@ -88,10 +88,12 @@ def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
     I = np.linalg.pinv(A) @ F_t
     return I
 
+# ----------------------------------------------------------------------------
+# # Test algorithm
+# ----------------------------------------------------------------------------
+# x, y, z = 0, 0, 5
+# F_x, F_y, F_z = 0, 0, 0.9
+# T_x, T_y = 0, 0
 
-x, y, z = 0, 0, 5
-F_x, F_y, F_z = 0, 0, 0.9
-T_x, T_y = 0, 0
-
-current = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y)
-print(current)
+# current = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y)
+# print(current)

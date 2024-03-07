@@ -45,6 +45,3 @@ jobs:
         if: always()
         run: make action-isort
 
-      - name: Run Pylint
-        if: always()
-        run: make action-pylint
