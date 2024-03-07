@@ -1,15 +1,14 @@
-
 # Import libraries
-import os
 import csv
+import os
 import subprocess
 
 import matplotlib.pyplot as plt
-import tensorflow as tf
 import numpy as np
 import pandas as pd
+import tensorflow as tf
 from keras.layers import Dense
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # -----------------------------------------------------------------------------
 # Define functions
@@ -33,6 +32,7 @@ def norm(x, mean, std):
     normed_value = (x - mean) / std
     return normed_value
 
+
 def denorm(x, mean, std):
     """
     Denormalizes a value or array of values using pre-calculated mean and standard deviation.
@@ -50,8 +50,8 @@ def denorm(x, mean, std):
 
 def evaluate_regression_model(original_data, predicted_data):
     """
-    Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE), 
-    Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage 
+    Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
+    Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
     based on the data range.
 
     Parameters:
@@ -65,38 +65,40 @@ def evaluate_regression_model(original_data, predicted_data):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
         predicted_data = predicted_data.to_numpy()
-    
+
     # Calculate Mean Absolute Error
     mae = mean_absolute_error(original_data, predicted_data)
-    
+
     # Calculate Mean Squared Error
     mse = mean_squared_error(original_data, predicted_data)
-    
+
     # Calculate Root Mean Squared Error
     rmse = np.sqrt(mse)
-    
+
     # Calculate R-squared
     r_squared = r2_score(original_data, predicted_data)
-    
+
     # Estimate the range of the data
     data_range = np.max(original_data) - np.min(original_data)
-    
+
     # Calculate custom accuracy percentage
     accuracy = (1 - rmse / data_range) * 100
-    accuracy_percentage = np.clip(accuracy, 0, 100)  # Ensure the percentage is between 0 and 100
-    
+    accuracy_percentage = np.clip(
+        accuracy, 0, 100
+    )  # Ensure the percentage is between 0 and 100
+
     # Print and return the evaluation metrics
     evaluation_metrics = {
         "MAE": mae,
         "MSE": mse,
         "RMSE": rmse,
         "R²": r_squared,
-        "Accuracy Percentage": accuracy_percentage
+        "Accuracy Percentage": accuracy_percentage,
     }
-    
+
     for metric, value in evaluation_metrics.items():
         print(f"# {metric}: {value:.2f}")
-    
+
     return evaluation_metrics
 
 
@@ -110,6 +112,7 @@ def install_xxd():
         print("xxd installed successfully.")
     except subprocess.CalledProcessError as e:
         print(f"Failed to install xxd: {e}")
+
 
 def convert_model_to_c_source(model_tflite, model_tflite_micro):
     """
@@ -126,6 +129,7 @@ def convert_model_to_c_source(model_tflite, model_tflite_micro):
     except subprocess.CalledProcessError as e:
         print(f"Failed to convert model: {e}")
 
+
 def update_variable_names(model_tflite_micro, original_name, new_name="position_model"):
     """
     Updates variable names in the generated C source file.
@@ -136,7 +140,7 @@ def update_variable_names(model_tflite_micro, original_name, new_name="position_
     - new_name (str): New variable name.
     """
     try:
-        replace_text = original_name.replace('/', '_').replace('.', '_')
+        replace_text = original_name.replace("/", "_").replace(".", "_")
         sed_cmd = f"s/{replace_text}/{new_name}/g"
         subprocess.run(["sed", "-i", sed_cmd, model_tflite_micro], check=True)
         print(f"Variable names updated in {model_tflite_micro}")
@@ -147,21 +151,21 @@ def update_variable_names(model_tflite_micro, original_name, new_name="position_
 # -----------------------------------------------------------------------------
 # Define paths to model files
 # -----------------------------------------------------------------------------
-MODELS_DIR = 'acels/models/'
+MODELS_DIR = "acels/models/"
 if not os.path.exists(MODELS_DIR):
     os.mkdir(MODELS_DIR)
 
-MODEL_TF = MODELS_DIR + 'model'
-MODEL_NO_QUANT_TFLITE = MODELS_DIR + 'model_no_quant.tflite'
-MODEL_TFLITE = MODELS_DIR + 'model.tflite'
-MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + 'model_no_quant.cc'
-MODEL_TFLITE_MICRO = MODELS_DIR + 'model.cc'
+MODEL_TF = MODELS_DIR + "model"
+MODEL_NO_QUANT_TFLITE = MODELS_DIR + "model_no_quant.tflite"
+MODEL_TFLITE = MODELS_DIR + "model.tflite"
+MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + "model_no_quant.cc"
+MODEL_TFLITE_MICRO = MODELS_DIR + "model.cc"
 
 # -----------------------------------------------------------------------------
 # Data Processing
 # -----------------------------------------------------------------------------
 # Assign dataset to data variable
-data = pd.read_csv('acels/data/position_data_float_xyz_extended.csv')
+data = pd.read_csv("acels/data/position_data_float_xyz_extended.csv")
 
 num_rows = data.shape[0]
 # Check datatype
@@ -177,20 +181,24 @@ train_model = False
 if train_model:
     # Print and save to csv for reuse in control software
     print(f"\nData Statistics: {train_stats}")
-    train_stats.to_csv('acels/data_statistics.csv', index=True)
+    train_stats.to_csv("acels/data_statistics.csv", index=True)
 
     # Separate Data into Feature and Target Variables
     # The `_og` suffix refers to the original data without normalization
     # It is assign to a variable to be later used for testing purposes
-    feature_data_og = data32[['s1','s2','s3','s4','s5','s6','s7','s8']]
-    target_data_og = data32[['x', 'y', 'z']]
+    feature_data_og = data32[["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"]]
+    target_data_og = data32[["x", "y", "z"]]
 
     # Split the data into  training and test sections
     TRAIN_SPLIT = int(0.6 * feature_data_og.shape[0])
     TEST_SPLIT = int(0.2 * feature_data_og.shape[0] + TRAIN_SPLIT)
 
-    feature_train_og, feature_test_og, feature_validate_og = np.split(feature_data_og, [TRAIN_SPLIT, TEST_SPLIT])
-    target_train_og, target_test_og, target_validate_og = np.split(target_data_og, [TRAIN_SPLIT, TEST_SPLIT])
+    feature_train_og, feature_test_og, feature_validate_og = np.split(
+        feature_data_og, [TRAIN_SPLIT, TEST_SPLIT]
+    )
+    target_train_og, target_test_og, target_validate_og = np.split(
+        target_data_og, [TRAIN_SPLIT, TEST_SPLIT]
+    )
 
     # Normalize data
     normed_data = norm(data32)
@@ -200,8 +208,8 @@ if train_model:
     # Data Splitting
     # -----------------------------------------------------------------------------
     # Separate Data into Feature and Target Variables
-    feature_data = normed_data[['s1','s2','s3','s4','s5','s6','s7','s8']]
-    target_data = normed_data[['x', 'y', 'z']]
+    feature_data = normed_data[["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"]]
+    target_data = normed_data[["x", "y", "z"]]
 
     feature = feature_data
     target = target_data
@@ -212,31 +220,41 @@ if train_model:
     TRAIN_SPLIT = int(0.6 * feature.shape[0])
     TEST_SPLIT = int(0.2 * feature.shape[0] + TRAIN_SPLIT)
 
-    feature_train, feature_test, feature_validate = np.split(feature, [TRAIN_SPLIT, TEST_SPLIT])
-    target_train, target_test, target_validate = np.split(target, [TRAIN_SPLIT, TEST_SPLIT])
+    feature_train, feature_test, feature_validate = np.split(
+        feature, [TRAIN_SPLIT, TEST_SPLIT]
+    )
+    target_train, target_test, target_validate = np.split(
+        target, [TRAIN_SPLIT, TEST_SPLIT]
+    )
 
     # -----------------------------------------------------------------------------
     # Model Building
     # -----------------------------------------------------------------------------
     # Create model with 8 input, 3 output and 5 hidden layers
     model = tf.keras.Sequential()
-    model.add(Dense(60, activation='tanh', input_shape=(8,)))
-    model.add(Dense(80, activation='tanh'))
-    model.add(Dense(80, activation='tanh'))
-    model.add(Dense(60, activation='tanh'))
-    model.add(Dense(30, activation='tanh'))
+    model.add(Dense(60, activation="tanh", input_shape=(8,)))
+    model.add(Dense(80, activation="tanh"))
+    model.add(Dense(80, activation="tanh"))
+    model.add(Dense(60, activation="tanh"))
+    model.add(Dense(30, activation="tanh"))
     model.add(Dense(3))
-    model.compile(optimizer='nadam', loss='mse', metrics=['mae'])
+    model.compile(optimizer="nadam", loss="mse", metrics=["mae"])
     model.summary()
 
     # -----------------------------------------------------------------------------
     # Model Training
     # -----------------------------------------------------------------------------
     # Train model
-    history_1 = model.fit(feature_train, target_train, epochs=4000, batch_size=64, validation_data=(feature_validate, target_validate))
+    history_1 = model.fit(
+        feature_train,
+        target_train,
+        epochs=4000,
+        batch_size=64,
+        validation_data=(feature_validate, target_validate),
+    )
     # Check Mean Absolute Error
-    test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0) 
-    print('Testing set Mean Abs Error: {:5.3f} mm'.format(test_mae))
+    test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0)
+    print("Testing set Mean Abs Error: {:5.3f} mm".format(test_mae))
 
     # Save model to disk
     model.save(MODEL_TF)
@@ -244,45 +262,44 @@ if train_model:
     # -----------------------------------------------------------------------------
     # Plot Training Metrics
     # -----------------------------------------------------------------------------
-    train_loss = history_1.history['loss']
-    val_loss = history_1.history['val_loss']
+    train_loss = history_1.history["loss"]
+    val_loss = history_1.history["val_loss"]
     epochs = range(1, len(train_loss) + 1)
-    train_mae = history_1.history['mae']
-    val_mae = history_1.history['val_mae']
+    train_mae = history_1.history["mae"]
+    val_mae = history_1.history["val_mae"]
     SKIP = 50
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))  # 2x2 plot
 
     # Plot Training and Validation Loss
-    axs[0, 0].plot(epochs, train_loss, 'g.', label='Training loss')
-    axs[0, 0].plot(epochs, val_loss, 'b', label='Validation loss')
-    axs[0, 0].set_title('Training and Validation Loss')
-    axs[0, 0].set_xlabel('Epochs')
-    axs[0, 0].set_ylabel('Loss')
+    axs[0, 0].plot(epochs, train_loss, "g.", label="Training loss")
+    axs[0, 0].plot(epochs, val_loss, "b", label="Validation loss")
+    axs[0, 0].set_title("Training and Validation Loss")
+    axs[0, 0].set_xlabel("Epochs")
+    axs[0, 0].set_ylabel("Loss")
     axs[0, 0].legend()
 
     # Re-plot Training and Validation Loss, skipping first 50
-    axs[0, 1].plot(epochs[SKIP:], train_loss[SKIP:], 'g.', label='Training loss')
-    axs[0, 1].plot(epochs[SKIP:], val_loss[SKIP:], 'b.', label='Validation loss')
-    axs[0, 1].set_title('Training and Validation Loss (Skip first 50)')
-    axs[0, 1].set_xlabel('Epochs')
-    axs[0, 1].set_ylabel('Loss')
+    axs[0, 1].plot(epochs[SKIP:], train_loss[SKIP:], "g.", label="Training loss")
+    axs[0, 1].plot(epochs[SKIP:], val_loss[SKIP:], "b.", label="Validation loss")
+    axs[0, 1].set_title("Training and Validation Loss (Skip first 50)")
+    axs[0, 1].set_xlabel("Epochs")
+    axs[0, 1].set_ylabel("Loss")
     axs[0, 1].legend()
 
     # Plot Training and Validation MAE, skipping first 50
-    axs[1, 0].plot(epochs[SKIP:], train_mae[SKIP:], 'g.', label='Training MAE')
-    axs[1, 0].plot(epochs[SKIP:], val_mae[SKIP:], 'b.', label='Validation MAE')
-    axs[1, 0].set_title('Training and Validation MAE (Skip first 50)')
-    axs[1, 0].set_xlabel('Epochs')
-    axs[1, 0].set_ylabel('MAE')
+    axs[1, 0].plot(epochs[SKIP:], train_mae[SKIP:], "g.", label="Training MAE")
+    axs[1, 0].plot(epochs[SKIP:], val_mae[SKIP:], "b.", label="Validation MAE")
+    axs[1, 0].set_title("Training and Validation MAE (Skip first 50)")
+    axs[1, 0].set_xlabel("Epochs")
+    axs[1, 0].set_ylabel("MAE")
     axs[1, 0].legend()
 
     # Empty plot for symmetry or additional plots if needed
-    axs[1, 1].axis('off')
+    axs[1, 1].axis("off")
 
     plt.tight_layout()
     plt.savefig("acels/figures/training_loss_metrics.svg")
     plt.show()
-
 
     # -----------------------------------------------------------------------------
     # Evaluate Model Predictions
@@ -301,17 +318,16 @@ if train_model:
     norm_y2 = target_test_pred[:, 1]
     norm_z2 = target_test_pred[:, 2]
 
-
     # Check model output values
     # Convert to dataframe for denormalization
-    pred_df = pd.DataFrame(target_test_pred, columns = ['x','y','z'])
+    pred_df = pd.DataFrame(target_test_pred, columns=["x", "y", "z"])
 
     # denormed_target = denorm(target)
     denorm_data = denorm(pred_df)
 
     actual_coordinates = target_test_og
     actual_coordinates_df = pd.DataFrame(actual_coordinates)
-    pred_coordinates = denorm_data[['x', 'y', 'z']]
+    pred_coordinates = denorm_data[["x", "y", "z"]]
 
     total_test_data = pd.concat([feature_test_og, target_test_og], axis=1)
 
@@ -339,39 +355,52 @@ if train_model:
     model_r2 = eval_metrics_og["R²"]
 
     # Adjusting titles, legends, and positioning of the accuracy text to improve clarity and avoid overlay
-    fig, axs = plt.subplots(1, 2,
-                            figsize=(16, 7),
-                            subplot_kw={'projection': '3d'},
-                            gridspec_kw={'wspace': 0.1})
+    fig, axs = plt.subplots(
+        1,
+        2,
+        figsize=(16, 7),
+        subplot_kw={"projection": "3d"},
+        gridspec_kw={"wspace": 0.1},
+    )
 
     # Normalized model predictions plot
-    axs[0].scatter3D(norm_x, norm_y, norm_z, marker='x', c='blue', s=15, label='Actual Values')
-    axs[0].scatter3D(norm_x2, norm_y2, norm_z2, c='red', s=8, alpha=0.5, label='Model Predictions')
-    axs[0].set_title('Normalized Model Predictions')
-    axs[0].set_xlabel('X')
-    axs[0].set_ylabel('Y')
-    axs[0].set_zlabel('Z')
+    axs[0].scatter3D(
+        norm_x, norm_y, norm_z, marker="x", c="blue", s=15, label="Actual Values"
+    )
+    axs[0].scatter3D(
+        norm_x2, norm_y2, norm_z2, c="red", s=8, alpha=0.5, label="Model Predictions"
+    )
+    axs[0].set_title("Normalized Model Predictions")
+    axs[0].set_xlabel("X")
+    axs[0].set_ylabel("Y")
+    axs[0].set_zlabel("Z")
     axs[0].legend()
 
     # Denormalized model predictions plot
-    axs[1].scatter3D(x, y, z, marker='x', c='blue', s=15, label='Actual Values')
-    axs[1].scatter3D(x2, y2, z2, c='red', s=8, alpha=0.5, label='Model Predictions')
-    axs[1].set_title('Denormalized Model Predictions')
-    axs[1].set_xlabel('X (mm)')
-    axs[1].set_ylabel('Y (mm)')
-    axs[1].set_zlabel('Z (mm)')
+    axs[1].scatter3D(x, y, z, marker="x", c="blue", s=15, label="Actual Values")
+    axs[1].scatter3D(x2, y2, z2, c="red", s=8, alpha=0.5, label="Model Predictions")
+    axs[1].set_title("Denormalized Model Predictions")
+    axs[1].set_xlabel("X (mm)")
+    axs[1].set_ylabel("Y (mm)")
+    axs[1].set_zlabel("Z (mm)")
     axs[1].legend()
 
     # Adjusting text position closer to the plots and using a consistent formatting style for both metrics
     plt.subplots_adjust(bottom=0.15)
-    fig.text(0.33, 0.05,
-            f'MAE: {model_mae_normed:.3f}, MSE: {model_mse_normed:.3f}, RMSE: {model_rmse_normed:.3f}, R²: {model_r2_normed:.3f}',
-            ha='center',
-            fontsize=12)
-    fig.text(0.73, 0.05,
-            f'MAE: {model_mae:.3f} mm, MSE: {model_mse:.3f} mm², RMSE: {model_rmse:.3f} mm, R²: {model_r2:.3f}',
-            ha='center',
-            fontsize=12)
+    fig.text(
+        0.33,
+        0.05,
+        f"MAE: {model_mae_normed:.3f}, MSE: {model_mse_normed:.3f}, RMSE: {model_rmse_normed:.3f}, R²: {model_r2_normed:.3f}",
+        ha="center",
+        fontsize=12,
+    )
+    fig.text(
+        0.73,
+        0.05,
+        f"MAE: {model_mae:.3f} mm, MSE: {model_mse:.3f} mm², RMSE: {model_rmse:.3f} mm, R²: {model_r2:.3f}",
+        ha="center",
+        fontsize=12,
+    )
 
     plt.savefig("acels/figures/model_eval.svg")
     plt.show()
@@ -382,35 +411,35 @@ if train_model:
 read = True
 if read:
     # Load the test data
-    test_data_path = 'acels/test_coordinates.csv'
+    test_data_path = "acels/test_coordinates.csv"
     test_data = pd.read_csv(test_data_path)
 
     # Separate features and targets
     features = test_data.iloc[:, :8].values  # s1 to s8
     targets = test_data.iloc[:, 8:].values  # x, y, z
-    
-    mean = train_stats['mean'][:8].values
-    std = train_stats['std'][:8].values
-    coord_mean = train_stats['mean'][8:].values
-    coord_std = train_stats['std'][8:].values
-    
+
+    mean = train_stats["mean"][:8].values
+    std = train_stats["std"][:8].values
+    coord_mean = train_stats["mean"][8:].values
+    coord_std = train_stats["std"][8:].values
+
     print(mean)
     print(std)
     print(features)
     print(len(features))
-    
+
     norm_features = norm(features, mean, std)
     norm_features32 = norm_features.astype(np.float32)
-    
+
     # print(norm_features)
 
-    model_path = 'acels/models/model.tflite'
-    model_no_quant_path = 'acels/models/model_no_quant.tflite'
+    model_path = "acels/models/model.tflite"
+    model_no_quant_path = "acels/models/model_no_quant.tflite"
 
     # Load the TFLite model and allocate tensors.
     interpreter = tf.lite.Interpreter(model_path=model_path)
     interpreter.allocate_tensors()
-    
+
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
 
@@ -420,31 +449,36 @@ if read:
     for i, input_data in enumerate(norm_features32):
         # Quantize the input data
 
-        input_data_quantized = (input_data / input_details[0]['quantization'][0] + input_details[0]['quantization'][1]).astype(input_details[0]['dtype'])
+        input_data_quantized = (
+            input_data / input_details[0]["quantization"][0]
+            + input_details[0]["quantization"][1]
+        ).astype(input_details[0]["dtype"])
 
         # Set the tensor to point to the input data
-        interpreter.set_tensor(input_details[0]['index'], [input_data_quantized])
+        interpreter.set_tensor(input_details[0]["index"], [input_data_quantized])
 
         # Run inference
         interpreter.invoke()
 
         # Get the output data
-        output_data = interpreter.get_tensor(output_details[0]['index'])[0]
+        output_data = interpreter.get_tensor(output_details[0]["index"])[0]
 
         # Dequantize the output data if necessary
         # Example dequantization, adjust based on your model's quantization parameters
-        output_data_dequantized = (output_data - output_details[0]['quantization'][1]) * output_details[0]['quantization'][0]
+        output_data_dequantized = (
+            output_data - output_details[0]["quantization"][1]
+        ) * output_details[0]["quantization"][0]
 
         predictions.append(output_data_dequantized)
 
     denorm_predictions = denorm(predictions, coord_mean, coord_std)
 
     # Save predictions to CSV
-    output_csv_path = 'acels/quantized_predictions.csv'
-    with open(output_csv_path, mode='w', newline='') as file:
+    output_csv_path = "acels/quantized_predictions.csv"
+    with open(output_csv_path, mode="w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(['x', 'y', 'z'])  # Adjust column names based on your output
-        
+        writer.writerow(["x", "y", "z"])  # Adjust column names based on your output
+
         for prediction in denorm_predictions:
             writer.writerow(prediction)
 
@@ -467,7 +501,8 @@ if convert_model:
     # Convert the model to the TensorFlow Lite format with quantization
     def representative_dataset():
         for _ in range(500):
-            yield([feature_train.astype(np.float32)])
+            yield ([feature_train.astype(np.float32)])
+
     # Set the optimization flag.
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
 
