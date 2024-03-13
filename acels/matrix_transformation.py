@@ -19,6 +19,7 @@ values_ty = data["Ty"].values
 # Determine the convex hull of the existing data points
 hull = ConvexHull(points)
 
+
 # Check if a point is inside the convex hull
 def is_inside_hull(point, hull):
     return all((np.dot(eq[:-1], point) + eq[-1]) <= 0 for eq in hull.equations)
