@@ -1,6 +1,7 @@
 action-pytest:
     # command to run your tests
 	pytest tests
+	pytest --cov=./acels --cov-report=xml --junitxml=testreport.xml tests/
 
 action-black:
     # command to run black for code formatting checks
