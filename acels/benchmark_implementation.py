@@ -24,7 +24,7 @@ def evaluate_regression_model(
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
 
-    file_name = f"model_{model_id}_{model_type}_metrics.txt"
+    file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
 
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
@@ -125,23 +125,23 @@ def compare_datasets(
 # -------------------------------------------------------------------------------------------
 model_id = "01"
 
-original_csv_path = f"acels/data/test_coordinates_{model_id}.csv"
+original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
 
 # Full model Results
 model_type_og = "og"
-full_model_pred = f"acels/predictions/full_model_predictions_{model_id}.csv"
+full_model_pred = f"acels/predictions/{model_id}_full_model_predictions.csv"
 
 # Non-quantized results
 model_type_non_quant = "non_quant_impl"
-non_quant_pred = f"acels/predictions/non_quantized_predictions_{model_id}.csv"
+non_quant_pred = f"acels/predictions/{model_id}_non_quantized_predictions.csv"
 non_quant_impl_pred = (
-    f"acels/predictions/non_quantized_implementation_output_{model_id}.csv"
+    f"acels/predictions/{model_id}_non_quantized_implementation_output.csv"
 )
 
 # Quantized results
 model_type_quant = "quant_impl"
-quant_pred = f"acels/predictions/quantized_predictions_{model_id}.csv"
-quant_impl_pred = f"acels/predictions/quantized_implementation_output_{model_id}.csv"
+quant_pred = f"acels/predictions/{model_id}_quantized_predictions.csv"
+quant_impl_pred = f"acels/predictions/{model_id}_quantized_implementation_output.csv"
 
 metrics_full_model = compare_datasets(
     model_id, model_type_og, original_csv_path, full_model_pred, "Full model", True

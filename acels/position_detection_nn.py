@@ -56,7 +56,7 @@ def denorm(x, mean, std):
     return denormed_value
 
 
-def evaluate_regression_model(original_data, predicted_data, model_id, model_type):
+def evaluate_regression_model(model_id, model_type, original_data, predicted_data):
     """
     Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
     Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
@@ -72,7 +72,7 @@ def evaluate_regression_model(original_data, predicted_data, model_id, model_typ
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
 
-    file_name = f"model_{model_id}_{model_type}_metrics.txt"
+    file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
 
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
@@ -102,6 +102,7 @@ def evaluate_regression_model(original_data, predicted_data, model_id, model_typ
 
     # Print and return the evaluation metrics
     evaluation_metrics = {
+        "Model ID":  model_id,
         "MAE": mae,
         "MSE": mse,
         "RMSE": rmse,
@@ -110,9 +111,11 @@ def evaluate_regression_model(original_data, predicted_data, model_id, model_typ
     }
 
     with open(file_name, "w") as f:
-        json.dump(evaluation_metrics, f)
+        json.dump(evaluation_metrics, f, indent=4)
 
     for metric, value in evaluation_metrics.items():
+        if type(metric) == str:
+            continue
         print(f"# {metric}: {value:.2f}")
 
     return evaluation_metrics
@@ -189,6 +192,7 @@ def data_processing(input_data):
 # -----------------------------------------------------------------------------
 def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32):
 
+    model_type = "og"
     data32, train_stats = data_processing(training_data)
 
     # Print and save to csv for reuse in control software
@@ -238,7 +242,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
         target, [TRAIN_SPLIT, TEST_SPLIT]
     )
 
-    feature_train.to_csv(f"acels/data/split_feature_data_{model_id}.csv", index=False)
+    feature_train.to_csv(f"acels/data/{model_id}_split_feature_data.csv", index=False)
 
     # -----------------------------------------------------------------------------
     # Model Building
@@ -311,7 +315,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     axs[1, 1].axis("off")
 
     plt.tight_layout()
-    plt.savefig(f"acels/figures/training_loss_metrics_{model_id}.svg")
+    plt.savefig(f"acels/figures/{model_id}_training_loss_metrics.svg")
     plt.show()
 
     # -----------------------------------------------------------------------------
@@ -344,9 +348,9 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
 
     total_test_data = pd.concat([feature_test_og, target_test_og], axis=1)
 
-    total_test_data.to_csv(f"acels/data/test_coordinates_{model_id}.csv", index=False)
+    total_test_data.to_csv(f"acels/data/{model_id}_test_coordinates.csv", index=False)
     pred_coordinates.to_csv(
-        f"acels/predictions/predicted_coordinates_{model_id}.csv", index=False
+        f"acels/predictions/{model_id}_og_predictions.csv", index=False
     )
 
     x = actual_coordinates.iloc[:, 0]
@@ -356,8 +360,8 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     y2 = pred_coordinates.iloc[:, 1]
     z2 = pred_coordinates.iloc[:, 2]
 
-    eval_metrics_normed = evaluate_regression_model(target_test, target_test_pred)
-    eval_metrics_og = evaluate_regression_model(target_test_og, pred_coordinates)
+    eval_metrics_normed = evaluate_regression_model(model_id, model_type, target_test, target_test_pred)
+    eval_metrics_og = evaluate_regression_model(model_id, model_type, target_test_og, pred_coordinates)
     # model_accuracy_normed = eval_metrics_normed["Accuracy Percentage"]
     model_mae_normed = eval_metrics_normed["MAE"]
     model_mse_normed = eval_metrics_normed["MSE"]
@@ -392,7 +396,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     axs[0].legend()
 
     # Denormalized model predictions plot
-    axs[1].scatter3D(x, y, z, marker="x", c="blue", s=15, label="Actual Values")
+    axs[1].scatter3D(x, y, z, c="blue", s=16, label="Actual Values")
     axs[1].scatter3D(x2, y2, z2, c="red", s=8, alpha=0.5, label="Model Predictions")
     axs[1].set_title("Denormalized Model Predictions")
     axs[1].set_xlabel("X (mm)")
@@ -417,7 +421,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
         fontsize=12,
     )
 
-    plt.savefig("acels/figures/model_eval.svg")
+    plt.savefig(f"acels/figures/{model_id}_model_eval.svg")
     plt.show()
 
 
@@ -497,7 +501,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
 #             writer.writerow(prediction)
 
 
-def read_model(
+def run_lite_model(
     test_data_path,
     quant_model_path,
     non_quant_model_path,
@@ -526,13 +530,24 @@ def read_model(
     input_details_quant = interpreter_quant.get_input_details()
     output_details_quant = interpreter_quant.get_output_details()
 
+    # Get the scale and zero_point for input quantization
+    input_scale, input_zero_point = input_details_quant[0]['quantization']
+
     predictions_quant = []
 
     for input_data in norm_features32:
-        interpreter_quant.set_tensor(input_details_quant[0]["index"], [input_data])
+        # Quantize the input data
+        input_data_quantized = np.round(input_data / input_scale + input_zero_point).astype(input_details_quant[0]['dtype'])
+
+        interpreter_quant.set_tensor(input_details_quant[0]["index"], [input_data_quantized])
         interpreter_quant.invoke()
         output_data = interpreter_quant.get_tensor(output_details_quant[0]["index"])[0]
-        predictions_quant.append(output_data)
+
+        # Dequantize the output data if needed, similar to the input quantization step but in reverse
+        output_scale, output_zero_point = output_details_quant[0]['quantization']
+        output_data_dequantized = (output_data - output_zero_point) * output_scale
+        
+        predictions_quant.append(output_data_dequantized)
 
     denorm_predictions_quant = denorm(predictions_quant, coord_mean, coord_std)
 
@@ -543,9 +558,19 @@ def read_model(
         for prediction in denorm_predictions_quant:
             writer.writerow(prediction)
 
-    # --- Non-Quantized Model Prediction ---
-    model_non_quant = tf.keras.models.load_model(non_quant_model_path)
-    predictions_non_quant = model_non_quant.predict(norm_features32)
+    # TensorFlow Lite Interpreter for Non-Quantized Model
+    interpreter_non_quant = tf.lite.Interpreter(model_path=non_quant_model_path)
+    interpreter_non_quant.allocate_tensors()
+    input_details_non_quant = interpreter_non_quant.get_input_details()
+    output_details_non_quant = interpreter_non_quant.get_output_details()
+
+    predictions_non_quant = []
+    for input_data in norm_features32:
+        interpreter_non_quant.set_tensor(input_details_non_quant[0]["index"], [input_data])
+        interpreter_non_quant.invoke()
+        output_data = interpreter_non_quant.get_tensor(output_details_non_quant[0]["index"])[0]
+        predictions_non_quant.append(output_data)
+    
     denorm_predictions_non_quant = denorm(predictions_non_quant, coord_mean, coord_std)
 
     # Save non-quantized model predictions to CSV
@@ -568,7 +593,7 @@ def convert_model(
     conversion_output_path_no_quant_micro,
 ):
 
-    feature_train = pd.read_csv(f"acels/data/split_feature_data_{model_id}.csv")
+    feature_train = pd.read_csv(f"acels/data/{model_id}_split_feature_data.csv")
     # Convert the model to the TensorFlow Lite format without quantization
     converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_path)
     model_no_quant_tflite = converter.convert()
@@ -668,16 +693,16 @@ if __name__ == "__main__":
     model_id = "01"
 
     MODEL_TF = MODELS_DIR + "model"
-    MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"model_no_quant_{model_id}.tflite"
-    MODEL_TFLITE = MODELS_DIR + f"model_{model_id}.tflite"
-    MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"model_no_quant_{model_id}.cc"
-    MODEL_TFLITE_MICRO = MODELS_DIR + f"model_{model_id}.cc"
+    MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
+    MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
+    MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"
+    MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
 
     training_data = "acels/data/position_data_float_xyz_extended.csv"
-    test_data = f"acels/data/test_coordinates_{model_id}.csv"
-    quantized_output_path = f"acels/predictions/quantized_predictions_{model_id}.csv"
+    test_data = f"acels/data/{model_id}_test_coordinates.csv"
+    quantized_output_path = f"acels/predictions/{model_id}_quantized_predictions.csv"
     non_quantized_output_path = (
-        f"acels/predictions/non_quantized_predictions_{model_id}.csv"
+        f"acels/predictions/{model_id}_non_quantized_predictions.csv"
     )
 
     # -------------------------------------------------------------------------
@@ -689,7 +714,7 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("\nNo options selected. Choose an operation to perform:\n")
         print("1. Train a new model (-t)")
-        print("2. Read and execute an existing model (-r)")
+        print("2. Read and evaluate an existing model (-r)")
         print("3. Convert model for embedded use (-c)")
         print("4. Show help (-h)")
         choice = input("\nEnter the number of your choice: ")
@@ -712,12 +737,12 @@ if __name__ == "__main__":
             model_id=model_id,
             training_data=training_data,
             model_path=MODEL_TF,
-            epochs=10,
+            epochs=25,
             batch_size=32,
         )
 
     elif args.read:
-        read_model(
+        run_lite_model(
             test_data_path=test_data,
             quant_model_path=MODEL_TFLITE,
             non_quant_model_path=MODEL_NO_QUANT_TFLITE,
@@ -727,6 +752,7 @@ if __name__ == "__main__":
 
     elif args.convert:
         convert_model(
+            model_id,
             MODEL_TF,
             MODEL_TFLITE,
             MODEL_TFLITE_MICRO,
