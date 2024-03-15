@@ -1,4 +1,5 @@
 import csv
+import json
 import time
 
 import numpy as np
@@ -7,7 +8,9 @@ import serial
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-def evaluate_regression_model(original_data, predicted_data, data_name):
+def evaluate_regression_model(
+    model_id, model_type, original_data, predicted_data, data_name
+):
     """
     Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
     Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
@@ -20,6 +23,9 @@ def evaluate_regression_model(original_data, predicted_data, data_name):
     Returns:
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
+
+    file_name = f"model_{model_id}_{model_type}_metrics.txt"
+
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
@@ -48,12 +54,16 @@ def evaluate_regression_model(original_data, predicted_data, data_name):
 
     # Print and return the evaluation metrics
     evaluation_metrics = {
+        "Model ID": model_id,
         "MAE": (mae, "mm"),
         "MSE": (mse, "mm²"),
         "RMSE": (rmse, "mm"),
         "R²": (r_squared, ""),
         "Accuracy Percentage": (accuracy_percentage, "%"),
     }
+
+    with open(file_name, "w") as f:
+        json.dump(evaluation_metrics, f)
 
     print(f"{data_name} metrics")
     for metric, value in evaluation_metrics.items():
@@ -62,7 +72,9 @@ def evaluate_regression_model(original_data, predicted_data, data_name):
     return evaluation_metrics
 
 
-def compare_datasets(original_csv, predicted_csv, data_name, existing=True):
+def compare_datasets(
+    model_id, model_type, original_csv, predicted_csv, data_name, existing=True
+):
     # Load the datasets
     original_data = pd.read_csv(original_csv, usecols=["x", "y", "z"])
     predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z"])
@@ -103,7 +115,7 @@ def compare_datasets(original_csv, predicted_csv, data_name, existing=True):
 
     # Evaluate the regression model
     evaluation_metrics = evaluate_regression_model(
-        original_data, predicted_data, data_name
+        model_id, model_type, original_data, predicted_data, data_name
     )
     return evaluation_metrics
 
@@ -111,25 +123,42 @@ def compare_datasets(original_csv, predicted_csv, data_name, existing=True):
 # -------------------------------------------------------------------------------------------
 # Main
 # -------------------------------------------------------------------------------------------
-original_csv_path = "acels/test_coordinates.csv"
+model_id = "01"
+
+original_csv_path = f"acels/data/test_coordinates_{model_id}.csv"
 
 # Full model Results
-full_model_pred = "acels/full_model_predictions.csv"
+model_type_og = "og"
+full_model_pred = f"acels/predictions/full_model_predictions_{model_id}.csv"
 
 # Non-quantized results
-non_quant_pred = "acels/non_quantized_predictions.csv"
-non_quant_impl_pred = "acels/non_quantized_implementation_output.csv"
+model_type_non_quant = "non_quant_impl"
+non_quant_pred = f"acels/predictions/non_quantized_predictions_{model_id}.csv"
+non_quant_impl_pred = (
+    f"acels/predictions/non_quantized_implementation_output_{model_id}.csv"
+)
 
 # Quantized results
-quant_pred = "acels/quantized_predictions.csv"
-quant_impl_pred = "acels/quantized_implementation_output.csv"
+model_type_quant = "quant_impl"
+quant_pred = f"acels/predictions/quantized_predictions_{model_id}.csv"
+quant_impl_pred = f"acels/predictions/quantized_implementation_output_{model_id}.csv"
 
 metrics_full_model = compare_datasets(
-    original_csv_path, full_model_pred, "Full model", True
+    model_id, model_type_og, original_csv_path, full_model_pred, "Full model", True
 )
 metrics_non_quant_pred_impl = compare_datasets(
-    original_csv_path, non_quant_impl_pred, "Non-quantized implemented model", True
+    model_id,
+    model_type_non_quant,
+    original_csv_path,
+    non_quant_impl_pred,
+    "Non-quantized implemented model",
+    True,
 )
 metrics_quant_pred_impl = compare_datasets(
-    original_csv_path, quant_impl_pred, "Quantized implemented model", True
+    model_id,
+    model_type_non_quant,
+    original_csv_path,
+    quant_impl_pred,
+    "Quantized implemented model",
+    True,
 )

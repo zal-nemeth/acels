@@ -1,4 +1,15 @@
 /*
+
+Model:
+model = tf.keras.Sequential()
+model.add(Dense(60, activation="tanh", input_shape=(8,)))
+model.add(Dense(80, activation="tanh"))
+model.add(Dense(80, activation="tanh"))
+model.add(Dense(60, activation="tanh"))
+model.add(Dense(30, activation="tanh"))
+model.add(Dense(3))
+model.compile(optimizer="nadam", loss="mse", metrics=["mae"])
+
 Quantized implemented model metrics metrics
 # MAE: 0.110 mm
 # MSE: 0.074 mm²
@@ -6,7 +17,8 @@ Quantized implemented model metrics metrics
 # R²: 0.999 
 # Accuracy Percentage: 99.320 %
 
-# Speed: 950 us
+# Input Coordinates   Speed: 
+-     0, 0, 5         950 us
 */
 
 unsigned char position_model[] = {

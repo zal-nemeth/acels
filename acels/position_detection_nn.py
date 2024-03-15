@@ -1,7 +1,11 @@
+# -------------------------------------------------------------------------------------------------
 # Import libraries
+import argparse
 import csv
+import json
 import os
 import subprocess
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,11 +14,12 @@ import tensorflow as tf
 from keras.layers import Dense
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
-# -----------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Define functions
-# -----------------------------------------------------------------------------
-
-
+# -------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Normalize data
 def norm(x, mean, std):
     """
@@ -40,16 +45,18 @@ def denorm(x, mean, std):
 
     This function is intended to reverse the normalization process for a dataset.
     Parameters:
-    - x (float or numpy.ndarray or pandas.Series): The normalized value(s) to be denormalized. This can be a single floating-point number, a NumPy array, or a pandas Series.
+    - x (float or numpy.ndarray or pandas.Series): The normalized value(s) to be denormalized.
+        This can be a single floating-point number, a NumPy array, or a pandas Series.
 
     Returns:
-    - denormed_value (float or numpy.ndarray or pandas.Series): The denormalized value(s). The return type matches the input type.
+    - denormed_value (float or numpy.ndarray or pandas.Series): The denormalized value(s).
+        The return type matches the input type.
     """
     denormed_value = (x * std) + mean
     return denormed_value
 
 
-def evaluate_regression_model(original_data, predicted_data):
+def evaluate_regression_model(original_data, predicted_data, model_id, model_type):
     """
     Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
     Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
@@ -58,10 +65,15 @@ def evaluate_regression_model(original_data, predicted_data):
     Parameters:
     - original_data (numpy.ndarray or pandas.DataFrame): The actual values.
     - predicted_data (numpy.ndarray or pandas.DataFrame): The predicted values by the model.
+    - model_id (str): ID of the model.
+    - model_type (str): Model type i.e. tflite, quantized, non-quantized etc.
 
     Returns:
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
+
+    file_name = f"model_{model_id}_{model_type}_metrics.txt"
+
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
@@ -96,6 +108,9 @@ def evaluate_regression_model(original_data, predicted_data):
         "R²": r_squared,
         "Accuracy Percentage": accuracy_percentage,
     }
+
+    with open(file_name, "w") as f:
+        json.dump(evaluation_metrics, f)
 
     for metric, value in evaluation_metrics.items():
         print(f"# {metric}: {value:.2f}")
@@ -149,40 +164,36 @@ def update_variable_names(model_tflite_micro, original_name, new_name="position_
         print(f"Failed to update variable names: {e}")
 
 
+def data_processing(input_data):
+    # -----------------------------------------------------------------------------
+    # Data Processing
+    # -----------------------------------------------------------------------------
+
+    data = pd.read_csv(input_data)
+
+    # num_rows = data.shape[0]
+    # Check datatype
+    data = data.sample(frac=1).reset_index(drop=True)
+    # Convert dataframe to float 32
+    data32 = data.astype(np.float32)
+
+    # Obtain data statistics
+    train_stats = data32.describe()
+    train_stats = train_stats.transpose()
+
+    return data32, train_stats
+
+
 # -----------------------------------------------------------------------------
-# Define paths to model files
+# Model definition and training
 # -----------------------------------------------------------------------------
-MODELS_DIR = "acels/models/"
-if not os.path.exists(MODELS_DIR):
-    os.mkdir(MODELS_DIR)
+def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32):
 
-MODEL_TF = MODELS_DIR + "model"
-MODEL_NO_QUANT_TFLITE = MODELS_DIR + "model_no_quant.tflite"
-MODEL_TFLITE = MODELS_DIR + "model.tflite"
-MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + "model_no_quant.cc"
-MODEL_TFLITE_MICRO = MODELS_DIR + "model.cc"
+    data32, train_stats = data_processing(training_data)
 
-# -----------------------------------------------------------------------------
-# Data Processing
-# -----------------------------------------------------------------------------
-# Assign dataset to data variable
-data = pd.read_csv("acels/data/position_data_float_xyz_extended.csv")
-
-num_rows = data.shape[0]
-# Check datatype
-data = data.sample(frac=1).reset_index(drop=True)
-# Convert dataframe to float 32
-data32 = data.astype(np.float32)
-
-# Obtain data statistics
-train_stats = data32.describe()
-train_stats = train_stats.transpose()
-
-train_model = False
-if train_model:
     # Print and save to csv for reuse in control software
     print(f"\nData Statistics: {train_stats}")
-    train_stats.to_csv("acels/data_statistics.csv", index=True)
+    train_stats.to_csv("acels/data/data_statistics.csv", index=True)
 
     # Separate Data into Feature and Target Variables
     # The `_og` suffix refers to the original data without normalization
@@ -194,15 +205,14 @@ if train_model:
     TRAIN_SPLIT = int(0.6 * feature_data_og.shape[0])
     TEST_SPLIT = int(0.2 * feature_data_og.shape[0] + TRAIN_SPLIT)
 
-    feature_train_og, feature_test_og, feature_validate_og = np.split(
-        feature_data_og, [TRAIN_SPLIT, TEST_SPLIT]
-    )
-    target_train_og, target_test_og, target_validate_og = np.split(
-        target_data_og, [TRAIN_SPLIT, TEST_SPLIT]
-    )
+    _, feature_test_og, _ = np.split(feature_data_og, [TRAIN_SPLIT, TEST_SPLIT])
+    _, target_test_og, _ = np.split(target_data_og, [TRAIN_SPLIT, TEST_SPLIT])
+
+    mean = train_stats["mean"][:].values
+    std = train_stats["std"][:].values
 
     # Normalize data
-    normed_data = norm(data32)
+    normed_data = norm(data32, mean, std)
     normed_data.head()
 
     # -----------------------------------------------------------------------------
@@ -228,6 +238,8 @@ if train_model:
         target, [TRAIN_SPLIT, TEST_SPLIT]
     )
 
+    feature_train.to_csv(f"acels/data/split_feature_data_{model_id}.csv", index=False)
+
     # -----------------------------------------------------------------------------
     # Model Building
     # -----------------------------------------------------------------------------
@@ -249,16 +261,16 @@ if train_model:
     history_1 = model.fit(
         feature_train,
         target_train,
-        epochs=4000,
-        batch_size=64,
+        epochs=epochs,
+        batch_size=batch_size,
         validation_data=(feature_validate, target_validate),
     )
     # Check Mean Absolute Error
-    test_loss, test_mae = model.evaluate(feature_test, target_test, verbose=0)
+    _, test_mae = model.evaluate(feature_test, target_test, verbose=0)
     print("Testing set Mean Abs Error: {:5.3f} mm".format(test_mae))
 
     # Save model to disk
-    model.save(MODEL_TF)
+    model.save(model_path)
 
     # -----------------------------------------------------------------------------
     # Plot Training Metrics
@@ -299,14 +311,14 @@ if train_model:
     axs[1, 1].axis("off")
 
     plt.tight_layout()
-    plt.savefig("acels/figures/training_loss_metrics.svg")
+    plt.savefig(f"acels/figures/training_loss_metrics_{model_id}.svg")
     plt.show()
 
     # -----------------------------------------------------------------------------
     # Evaluate Model Predictions
     # -----------------------------------------------------------------------------
     # Calculate and print the loss on our test dataset
-    test_loss, test_mae = model.evaluate(feature_test, target_test)
+    _, test_mae = model.evaluate(feature_test, target_test)
     # Make predictions based on our test dataset
     target_test_pred = model.predict(feature_test)
 
@@ -324,7 +336,7 @@ if train_model:
     pred_df = pd.DataFrame(target_test_pred, columns=["x", "y", "z"])
 
     # denormed_target = denorm(target)
-    denorm_data = denorm(pred_df)
+    denorm_data = denorm(pred_df, mean[8:], std[8:])
 
     actual_coordinates = target_test_og
     actual_coordinates_df = pd.DataFrame(actual_coordinates)
@@ -332,8 +344,10 @@ if train_model:
 
     total_test_data = pd.concat([feature_test_og, target_test_og], axis=1)
 
-    total_test_data.to_csv("acels/test_coordinates.csv", index=False)
-    pred_coordinates.to_csv("acels/predicted_coordinates.csv", index=False)
+    total_test_data.to_csv(f"acels/data/test_coordinates_{model_id}.csv", index=False)
+    pred_coordinates.to_csv(
+        f"acels/predictions/predicted_coordinates_{model_id}.csv", index=False
+    )
 
     x = actual_coordinates.iloc[:, 0]
     y = actual_coordinates.iloc[:, 1]
@@ -406,98 +420,168 @@ if train_model:
     plt.savefig("acels/figures/model_eval.svg")
     plt.show()
 
+
 # -----------------------------------------------------------------------------
 # Read existing model
 # -----------------------------------------------------------------------------
-read = True
-if read:
+# def read_model(
+#     model_path,
+#     test_data_path,
+#     output_path
+# ):
+#     # Load the test data
+#     # test_data_path = "acels/test_coordinates.csv"
+#     test_data = pd.read_csv(test_data_path)
+#     train_stats = pd.read_csv(f"acels/data/data_statistics.csv")
+
+#     # Separate features and targets
+#     features = test_data.iloc[:, :8].values  # s1 to s8
+#     _ = test_data.iloc[:, 8:].values  # x, y, z
+
+#     mean = train_stats["mean"][:8].values
+#     std = train_stats["std"][:8].values
+#     coord_mean = train_stats["mean"][8:].values
+#     coord_std = train_stats["std"][8:].values
+
+#     print(mean)
+#     print(std)
+#     print(features)
+#     print(len(features))
+
+#     norm_features = norm(features, mean, std)
+#     norm_features32 = norm_features.astype(np.float32)
+
+#     # Load the TFLite model and allocate tensors.
+#     interpreter = tf.lite.Interpreter(model_path=model_path)
+#     interpreter.allocate_tensors()
+
+#     input_details = interpreter.get_input_details()
+#     output_details = interpreter.get_output_details()
+
+#     # Container for predictions
+#     predictions = []
+
+#     for _, input_data in enumerate(norm_features32):
+#         # Quantize the input data
+
+#         input_data_quantized = (
+#             input_data / input_details[0]["quantization"][0]
+#             + input_details[0]["quantization"][1]
+#         ).astype(input_details[0]["dtype"])
+
+#         # Set the tensor to point to the input data
+#         interpreter.set_tensor(input_details[0]["index"], [input_data_quantized])
+
+#         # Run inference
+#         interpreter.invoke()
+
+#         # Get the output data
+#         output_data = interpreter.get_tensor(output_details[0]["index"])[0]
+
+#         # Dequantize the output data if necessary
+#         # Example dequantization, adjust based on your model's quantization parameters
+#         output_data_dequantized = (
+#             output_data - output_details[0]["quantization"][1]
+#         ) * output_details[0]["quantization"][0]
+
+#         predictions.append(output_data_dequantized)
+
+#     denorm_predictions = denorm(predictions, coord_mean, coord_std)
+
+#     # Save predictions to CSV
+#     with open(output_path, mode="w", newline="") as file:
+#         writer = csv.writer(file)
+#         writer.writerow(["x", "y", "z"])  # Adjust column names based on your output
+
+#         for prediction in denorm_predictions:
+#             writer.writerow(prediction)
+
+
+def read_model(
+    test_data_path,
+    quant_model_path,
+    non_quant_model_path,
+    quant_output_path,
+    non_quant_output_path,
+):
     # Load the test data
-    test_data_path = "acels/test_coordinates.csv"
     test_data = pd.read_csv(test_data_path)
+    train_stats = pd.read_csv("acels/data/data_statistics.csv")
 
     # Separate features and targets
     features = test_data.iloc[:, :8].values  # s1 to s8
-    targets = test_data.iloc[:, 8:].values  # x, y, z
 
     mean = train_stats["mean"][:8].values
     std = train_stats["std"][:8].values
     coord_mean = train_stats["mean"][8:].values
     coord_std = train_stats["std"][8:].values
 
-    print(mean)
-    print(std)
-    print(features)
-    print(len(features))
-
     norm_features = norm(features, mean, std)
     norm_features32 = norm_features.astype(np.float32)
 
-    # print(norm_features)
+    # --- Quantized Model Prediction ---
+    interpreter_quant = tf.lite.Interpreter(model_path=quant_model_path)
+    interpreter_quant.allocate_tensors()
 
-    model_path = "acels/models/model.tflite"
-    model_no_quant_path = "acels/models/model_no_quant.tflite"
+    input_details_quant = interpreter_quant.get_input_details()
+    output_details_quant = interpreter_quant.get_output_details()
 
-    # Load the TFLite model and allocate tensors.
-    interpreter = tf.lite.Interpreter(model_path=model_path)
-    interpreter.allocate_tensors()
+    predictions_quant = []
 
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
+    for input_data in norm_features32:
+        interpreter_quant.set_tensor(input_details_quant[0]["index"], [input_data])
+        interpreter_quant.invoke()
+        output_data = interpreter_quant.get_tensor(output_details_quant[0]["index"])[0]
+        predictions_quant.append(output_data)
 
-    # Container for predictions
-    predictions = []
+    denorm_predictions_quant = denorm(predictions_quant, coord_mean, coord_std)
 
-    for i, input_data in enumerate(norm_features32):
-        # Quantize the input data
-
-        input_data_quantized = (
-            input_data / input_details[0]["quantization"][0]
-            + input_details[0]["quantization"][1]
-        ).astype(input_details[0]["dtype"])
-
-        # Set the tensor to point to the input data
-        interpreter.set_tensor(input_details[0]["index"], [input_data_quantized])
-
-        # Run inference
-        interpreter.invoke()
-
-        # Get the output data
-        output_data = interpreter.get_tensor(output_details[0]["index"])[0]
-
-        # Dequantize the output data if necessary
-        # Example dequantization, adjust based on your model's quantization parameters
-        output_data_dequantized = (
-            output_data - output_details[0]["quantization"][1]
-        ) * output_details[0]["quantization"][0]
-
-        predictions.append(output_data_dequantized)
-
-    denorm_predictions = denorm(predictions, coord_mean, coord_std)
-
-    # Save predictions to CSV
-    output_csv_path = "acels/quantized_predictions.csv"
-    with open(output_csv_path, mode="w", newline="") as file:
+    # Save quantized model predictions to CSV
+    with open(quant_output_path, mode="w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["x", "y", "z"])  # Adjust column names based on your output
+        writer.writerow(["x", "y", "z"])
+        for prediction in denorm_predictions_quant:
+            writer.writerow(prediction)
 
-        for prediction in denorm_predictions:
+    # --- Non-Quantized Model Prediction ---
+    model_non_quant = tf.keras.models.load_model(non_quant_model_path)
+    predictions_non_quant = model_non_quant.predict(norm_features32)
+    denorm_predictions_non_quant = denorm(predictions_non_quant, coord_mean, coord_std)
+
+    # Save non-quantized model predictions to CSV
+    with open(non_quant_output_path, mode="w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["x", "y", "z"])
+        for prediction in denorm_predictions_non_quant:
             writer.writerow(prediction)
 
 
 # -----------------------------------------------------------------------------
 # Model Conversion
 # -----------------------------------------------------------------------------
-convert_model = False
-if convert_model:
+def convert_model(
+    model_id,
+    saved_model_path,
+    conversion_output_path,
+    conversion_output_path_micro,
+    conversion_output_path_no_quant,
+    conversion_output_path_no_quant_micro,
+):
+
+    feature_train = pd.read_csv(f"acels/data/split_feature_data_{model_id}.csv")
     # Convert the model to the TensorFlow Lite format without quantization
-    converter = tf.lite.TFLiteConverter.from_saved_model(MODEL_TF)
+    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_path)
     model_no_quant_tflite = converter.convert()
     # Save the model to disk
-    open(MODEL_NO_QUANT_TFLITE, "wb").write(model_no_quant_tflite)
+    open(conversion_output_path_no_quant, "wb").write(model_no_quant_tflite)
 
     install_xxd()
-    convert_model_to_c_source(MODEL_NO_QUANT_TFLITE, MODEL_NO_QUANT_TFLITE_MICRO)
-    update_variable_names(MODEL_NO_QUANT_TFLITE_MICRO, MODEL_NO_QUANT_TFLITE)
+    convert_model_to_c_source(
+        conversion_output_path_no_quant, conversion_output_path_no_quant_micro
+    )
+    update_variable_names(
+        conversion_output_path_no_quant_micro, conversion_output_path_no_quant
+    )
 
     # Convert the model to the TensorFlow Lite format with quantization
     def representative_dataset():
@@ -516,8 +600,136 @@ if convert_model:
     model_tflite = converter.convert()
 
     # Save the model to disk
-    open(MODEL_TFLITE, "wb").write(model_tflite)
+    open(conversion_output_path, "wb").write(model_tflite)
 
     install_xxd()
-    convert_model_to_c_source(MODEL_TFLITE, MODEL_TFLITE_MICRO)
-    update_variable_names(MODEL_TFLITE_MICRO, MODEL_TFLITE)
+    convert_model_to_c_source(conversion_output_path, conversion_output_path_micro)
+    update_variable_names(conversion_output_path_micro, conversion_output_path)
+
+
+# -----------------------------------------------------------------------------
+# Help/Description Function
+# -----------------------------------------------------------------------------
+def show_help():
+    help_message = """
+    Usage: python script_name.py [OPTIONS]
+    
+    Options:
+    -t, --train                         Start training a new model. Requires --training_data and --model_path.
+        --training_data PATH            Path to the training data.
+        --model_path PATH               Path where the trained model will be saved.
+        --epochs EPOCHS                 Number of epochs (optional, default=1000).
+        --batch_size BATCH_SIZE         Batch size (optional, default=32).
+
+    -r, --read                          Read and execute an existing model. Requires --test_data_path, --model_path, and --output_path.
+        --test_data_path PATH           Path to test data (optional, default="acels/test_coordinates.csv").
+        --model_path PATH               Path to model (optional, default="acels/models/model.tflite").
+        --output_path PATH              Output path for predictions (optional, default="acels/quantized_predictions.csv").
+
+    -c, --convert                       Convert model for embedded use. Requires --saved_model_path and --conversion_output_path.
+        --saved_model_path PATH         Path to saved model (optional, default="acels/models/model").
+        --conversion_output_path PATH   Output path for the converted model (optional, default="acels/models/model.tflite").
+
+    -h, --help                          Show this help message and exit.
+    """
+    print(help_message)
+
+
+# -----------------------------------------------------------------------------
+# Main Function
+# -----------------------------------------------------------------------------
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Model Operations", add_help=False)
+    parser.add_argument(
+        "-t", "--train", action="store_true", help="Start training a new model"
+    )
+    parser.add_argument(
+        "-r", "--read", action="store_true", help="Read and execute an existing model"
+    )
+    parser.add_argument(
+        "-c", "--convert", action="store_true", help="Convert model for embedded use"
+    )
+
+    parser.add_argument(
+        "-h", "--help", action="store_true", help="Show help message and exit."
+    )
+
+    args = parser.parse_args()
+
+    # ---------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------
+    # Path and variable definitions
+    # ---------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------
+    MODELS_DIR = "acels/models/"
+    if not os.path.exists(MODELS_DIR):
+        os.mkdir(MODELS_DIR)
+
+    model_id = "01"
+
+    MODEL_TF = MODELS_DIR + "model"
+    MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"model_no_quant_{model_id}.tflite"
+    MODEL_TFLITE = MODELS_DIR + f"model_{model_id}.tflite"
+    MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"model_no_quant_{model_id}.cc"
+    MODEL_TFLITE_MICRO = MODELS_DIR + f"model_{model_id}.cc"
+
+    training_data = "acels/data/position_data_float_xyz_extended.csv"
+    test_data = f"acels/data/test_coordinates_{model_id}.csv"
+    quantized_output_path = f"acels/predictions/quantized_predictions_{model_id}.csv"
+    non_quantized_output_path = (
+        f"acels/predictions/non_quantized_predictions_{model_id}.csv"
+    )
+
+    # -------------------------------------------------------------------------
+    # Argument parsing
+    # -------------------------------------------------------------------------
+    # Check if no arguments or the help option was provided
+
+    # Interactive prompt if no arguments provided
+    if len(sys.argv) == 1:
+        print("\nNo options selected. Choose an operation to perform:\n")
+        print("1. Train a new model (-t)")
+        print("2. Read and execute an existing model (-r)")
+        print("3. Convert model for embedded use (-c)")
+        print("4. Show help (-h)")
+        choice = input("\nEnter the number of your choice: ")
+
+        if choice == "1":
+            args.train = True
+        elif choice == "2":
+            args.read
+        elif choice == "3":
+            args.convert = True
+        elif choice == "4":
+            show_help()
+            exit()
+
+    # Handle arguments as before...
+    if args.help:
+        show_help()
+    elif args.train:
+        train_model(
+            model_id=model_id,
+            training_data=training_data,
+            model_path=MODEL_TF,
+            epochs=10,
+            batch_size=32,
+        )
+
+    elif args.read:
+        read_model(
+            test_data_path=test_data,
+            quant_model_path=MODEL_TFLITE,
+            non_quant_model_path=MODEL_NO_QUANT_TFLITE,
+            quant_output_path=quantized_output_path,
+            non_quant_output_path=non_quantized_output_path,
+        )
+
+    elif args.convert:
+        convert_model(
+            MODEL_TF,
+            MODEL_TFLITE,
+            MODEL_TFLITE_MICRO,
+            MODEL_NO_QUANT_TFLITE,
+            MODEL_NO_QUANT_TFLITE_MICRO,
+        )
