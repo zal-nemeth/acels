@@ -693,13 +693,38 @@ if __name__ == "__main__":
     ###########################
     #    Define Parameters    #
     ###########################
-    model_id = "02"
-    epochs = 4000
+    model_id = "03"
+    epochs = 1800
     batch_size = 32
+    activations = [
+        "relu",
+        "selu",
+        "tanh",
+        "sigmoid",
+        "softmax",
+        "swish",
+        "softplus",
+        "softsign",
+        "hard_sigmoid",
+        "gelu",
+        "elu",
+        "serialize",
+    ]
+    optimizers = [
+        "RMSprop",
+        "adam",
+        "nadam",
+        "adamax",
+        "adagrad",
+        "ftrl",
+        "sgd",
+        "adafactor",
+        "lion",
+    ]
     ###########################
     ###########################
 
-    MODEL_TF = MODELS_DIR + "model"
+    MODEL_TF = MODELS_DIR + f"model_{model_id}"
     MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
     MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
     MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"

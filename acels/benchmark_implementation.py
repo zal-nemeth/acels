@@ -31,8 +31,8 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
-        if 'runtime' in predicted_data.columns:
-            average_runtime = predicted_data['runtime'].mean()
+        if "runtime" in predicted_data.columns:
+            average_runtime = predicted_data["runtime"].mean()
             predicted_data = predicted_data[["x", "y", "z"]]
         predicted_data = predicted_data.to_numpy()
 
@@ -74,7 +74,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     # Check if file exists to append or write new
     mode = "a" if os.path.exists(file_name) else "w"
 
-    with open(file_name, mode,  encoding='utf-8') as f:
+    with open(file_name, mode, encoding="utf-8") as f:
         f.write(f"Model type: {model_type}\n")
         for metric, value in evaluation_metrics.items():
             if isinstance(value, str):
@@ -95,9 +95,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     return evaluation_metrics
 
 
-def compare_datasets(
-    model_id, model_type, original_csv, predicted_csv, existing=True
-):
+def compare_datasets(model_id, model_type, original_csv, predicted_csv, existing=True):
     """
     Compares original dataset coordinates with predicted ones and evaluates the regression model's performance.
 
@@ -143,9 +141,7 @@ def compare_datasets(
 
             # Skip header row in input, write header to output
             next(reader)
-            writer.writerow(
-                ["x", "y", "z", "runtime"]
-            )
+            writer.writerow(["x", "y", "z", "runtime"])
 
             for row in reader:
                 # Send s1 through s8 as a comma-separated string, then read the response
@@ -188,23 +184,19 @@ if __name__ == "__main__":
     # Non-quantized results
     model_type_non_quant = "non_quant_impl"
     non_quant_pred = f"acels\\predictions\\{model_id}_non_quantized_predictions.csv"
-    non_quant_impl_pred = (
-        f"acels\\predictions\\{model_id}_non_quantized_impl_preds.csv"
-    )
+    non_quant_impl_pred = f"acels\\predictions\\{model_id}_non_quantized_impl_preds.csv"
 
     # Quantized results
     model_type_quant = "quant_impl"
     quant_pred = f"acels/predictions/{model_id}_quantized_predictions.csv"
-    quant_impl_pred = (
-        f"acels/predictions/{model_id}_quantized_impl_preds.csv"
-    )
+    quant_impl_pred = f"acels/predictions/{model_id}_quantized_impl_preds.csv"
 
-    metrics_full_model = compare_datasets(
-        model_id, model_type_og, original_csv_path, full_model_pred, True
-    )
+    # metrics_full_model = compare_datasets(
+    #     model_id, model_type_og, original_csv_path, full_model_pred, True
+    # )
     # metrics_non_quant_pred_impl = compare_datasets(
     #     model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
     # )
-    # metrics_quant_pred_impl = compare_datasets(
-    #     model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
-    # )
+    metrics_quant_pred_impl = compare_datasets(
+        model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
+    )
