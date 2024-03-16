@@ -36,3 +36,8 @@ Metrics: ['loss', 'mae']
 Epochs: 4000
 Batch Size: 32
 
+Model type: og
+# MAE: 0.0902 mm
+# MSE: 0.1142 mm²
+# RMSE: 0.3379 mm
+# R²: 0.9984 

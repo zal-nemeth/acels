@@ -77,8 +77,9 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     with open(file_name, mode,  encoding='utf-8') as f:
         f.write(f"Model type: {model_type}\n")
         for metric, value in evaluation_metrics.items():
-            if isinstance(value, str) and average_runtime:
-                f.write(f"Model ID: {model_id}\n")
+            if isinstance(value, str):
+                if average_runtime:
+                    f.write(f"Model ID: {model_id}\n")
                 continue
             if value[1] == "%":
                 continue
@@ -175,7 +176,7 @@ def compare_datasets(
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "01"
+    model_id = "02"
     data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
@@ -198,12 +199,12 @@ if __name__ == "__main__":
         f"acels/predictions/{model_id}_quantized_impl_preds.csv"
     )
 
-    # metrics_full_model = compare_datasets(
-    #     model_id, model_type_og, original_csv_path, full_model_pred, True
-    # )
+    metrics_full_model = compare_datasets(
+        model_id, model_type_og, original_csv_path, full_model_pred, True
+    )
     # metrics_non_quant_pred_impl = compare_datasets(
     #     model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
     # )
-    metrics_quant_pred_impl = compare_datasets(
-        model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
-    )
+    # metrics_quant_pred_impl = compare_datasets(
+    #     model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
+    # )
