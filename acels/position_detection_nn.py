@@ -139,7 +139,7 @@ def data_processing(input_data):
 # -----------------------------------------------------------------------------
 # Model definition and training
 # -----------------------------------------------------------------------------
-def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32):
+def train_model(model_id, training_data, model_path, activation, optimizer, epochs=1000, batch_size=32):
     """
     Trains a neural network model on provided dataset and evaluates its performance.
 
@@ -225,13 +225,13 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     # -----------------------------------------------------------------------------
     # Create model with 8 input, 3 output and 5 hidden layers
     model = tf.keras.Sequential()
-    model.add(Dense(60, activation="relu", input_shape=(8,)))
-    model.add(Dense(80, activation="relu"))
-    model.add(Dense(80, activation="relu"))
-    model.add(Dense(60, activation="relu"))
-    model.add(Dense(30, activation="relu"))
+    model.add(Dense(60, activation=activation, input_shape=(8,)))
+    model.add(Dense(80, activation=activation))
+    model.add(Dense(80, activation=activation))
+    model.add(Dense(60, activation=activation))
+    model.add(Dense(30, activation=activation))
     model.add(Dense(3))
-    model.compile(optimizer="RMSprop", loss="mse", metrics=["mae"])
+    model.compile(optimizer=optimizer, loss="mse", metrics=["mae"])
     model.summary()
 
     # -----------------------------------------------------------------------------
@@ -646,14 +646,16 @@ def show_help():
         --epochs EPOCHS                 Number of epochs (optional, default=1000).
         --batch_size BATCH_SIZE         Batch size (optional, default=32).
 
+    -c, --convert                       Convert model for embedded use. Requires --saved_model_path and --conversion_output_path.
+        --saved_model_path PATH         Path to saved model (optional, default="acels/models/model").
+        --conversion_output_path PATH   Output path for the converted model (optional, default="acels/models/model.tflite").
+
     -r, --read                          Read and execute an existing model. Requires --test_data_path, --model_path, and --output_path.
         --test_data_path PATH           Path to test data (optional, default="acels/test_coordinates.csv").
         --model_path PATH               Path to model (optional, default="acels/models/model.tflite").
         --output_path PATH              Output path for predictions (optional, default="acels/quantized_predictions.csv").
 
-    -c, --convert                       Convert model for embedded use. Requires --saved_model_path and --conversion_output_path.
-        --saved_model_path PATH         Path to saved model (optional, default="acels/models/model").
-        --conversion_output_path PATH   Output path for the converted model (optional, default="acels/models/model.tflite").
+    -a, --all                           Run all. Includes training, conversion and running the lite version of the model.
 
     -h, --help                          Show this help message and exit.
     """
@@ -669,12 +671,14 @@ if __name__ == "__main__":
         "-t", "--train", action="store_true", help="Start training a new model"
     )
     parser.add_argument(
+        "-c", "--convert", action="store_true", help="Convert model for embedded use"
+    )
+    parser.add_argument(
         "-r", "--read", action="store_true", help="Read and execute an existing model"
     )
     parser.add_argument(
-        "-c", "--convert", action="store_true", help="Convert model for embedded use"
+        "-a", "--all", action="store_true", help="Run all (train, convert, run)"
     )
-
     parser.add_argument(
         "-h", "--help", action="store_true", help="Show help message and exit."
     )
@@ -694,7 +698,8 @@ if __name__ == "__main__":
     #    Define Parameters    #
     ###########################
     model_id = "03"
-    epochs = 1800
+    model_id_int = 3
+    epochs = 1
     batch_size = 32
     activations = [
         "relu",
@@ -708,7 +713,6 @@ if __name__ == "__main__":
         "hard_sigmoid",
         "gelu",
         "elu",
-        "serialize",
     ]
     optimizers = [
         "RMSprop",
@@ -718,13 +722,11 @@ if __name__ == "__main__":
         "adagrad",
         "ftrl",
         "sgd",
-        "adafactor",
-        "lion",
     ]
     ###########################
     ###########################
 
-    MODEL_TF = MODELS_DIR + f"model_{model_id}"
+    MODEL_TF = MODELS_DIR + f"{model_id}_model"
     MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
     MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
     MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"
@@ -746,18 +748,21 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         print("\nNo options selected. Choose an operation to perform:\n")
         print("1. Train a new model (-t)")
-        print("2. Read and evaluate an existing model (-r)")
-        print("3. Convert model for embedded use (-c)")
-        print("4. Show help (-h)")
+        print("2. Convert model for embedded use (-c)")
+        print("3. Run and execute an Lite model (-r)")
+        print("4. Run all (-a)")
+        print("5. Show help (-h)")
         choice = input("\nEnter the number of your choice: ")
 
         if choice == "1":
             args.train = True
         elif choice == "2":
-            args.read
+            args.convert
         elif choice == "3":
-            args.convert = True
+            args.read = True
         elif choice == "4":
+            args.all = True
+        elif choice == "5":
             show_help()
             exit()
 
@@ -769,17 +774,10 @@ if __name__ == "__main__":
             model_id=model_id,
             training_data=training_data,
             model_path=MODEL_TF,
+            activation="tanh",
+            optimizer="nadam",
             epochs=epochs,
             batch_size=batch_size,
-        )
-
-    elif args.read:
-        run_lite_model(
-            test_data_path=test_data,
-            quant_model_path=MODEL_TFLITE,
-            non_quant_model_path=MODEL_NO_QUANT_TFLITE,
-            quant_output_path=quantized_output_path,
-            non_quant_output_path=non_quantized_output_path,
         )
 
     elif args.convert:
@@ -791,3 +789,52 @@ if __name__ == "__main__":
             MODEL_NO_QUANT_TFLITE,
             MODEL_NO_QUANT_TFLITE_MICRO,
         )
+
+    elif args.read:
+        run_lite_model(
+            test_data_path=test_data,
+            quant_model_path=MODEL_TFLITE,
+            non_quant_model_path=MODEL_NO_QUANT_TFLITE,
+            quant_output_path=quantized_output_path,
+            non_quant_output_path=non_quantized_output_path,
+        )
+    
+    elif args.all:
+        for optimizer in optimizers:
+            for activation in activations:
+                model_id = f"{model_id_int:02d}"
+                MODEL_TF = MODELS_DIR + f"{model_id}_model"
+                MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
+                MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
+                MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"
+                MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
+                test_data = f"acels/data/{model_id}_test_coordinates.csv"
+                quantized_output_path = f"acels/predictions/{model_id}_quantized_predictions.csv"
+                non_quantized_output_path = (
+                    f"acels/predictions/{model_id}_non_quantized_predictions.csv"
+                )
+                train_model(
+                    model_id=model_id,
+                    training_data=training_data,
+                    model_path=MODEL_TF,
+                    activation=activation,
+                    optimizer=optimizer,
+                    epochs=epochs,
+                    batch_size=batch_size,
+                )
+                convert_model(
+                    model_id,
+                    MODEL_TF,
+                    MODEL_TFLITE,
+                    MODEL_TFLITE_MICRO,
+                    MODEL_NO_QUANT_TFLITE,
+                    MODEL_NO_QUANT_TFLITE_MICRO,
+                )
+                # run_lite_model(
+                #     test_data_path=test_data,
+                #     quant_model_path=MODEL_TFLITE,
+                #     non_quant_model_path=MODEL_NO_QUANT_TFLITE,
+                #     quant_output_path=quantized_output_path,
+                #     non_quant_output_path=non_quantized_output_path,
+                # )
+                model_id_int += 1
