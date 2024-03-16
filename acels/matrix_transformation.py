@@ -102,11 +102,12 @@ def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
 # ----------------------------------------------------------------------------
 # # Test algorithm
 # ----------------------------------------------------------------------------
-# x, y, z = 9, 5, 10
-# F_x, F_y, F_z = 0, 0, 0.9
-# T_x, T_y = 0, 0
+# if __init__ == "__main__":
+#     x, y, z = 9, 5, 10
+#     F_x, F_y, F_z = 0, 0, 0.9
+#     T_x, T_y = 0, 0
 
-# current = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y)
+#     current = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y)
 
-# for i in current:
-#     print(f"{i},")
+#     for i in current:
+#         print(f"{i},")

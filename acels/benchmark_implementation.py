@@ -1,3 +1,4 @@
+import os
 import csv
 import json
 import time
@@ -62,12 +63,19 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
         "Accuracy Percentage": (accuracy_percentage, "%"),
     }
 
-    with open(file_name, "w") as f:
-        json.dump(evaluation_metrics, f, indent=4)
+    # Check if file exists to append or write new
+    mode = "a" if os.path.exists(file_name) else "w"
 
-    print(f"{model_type} model metrics")
+    with open(file_name, mode) as f:
+        for metric, value in evaluation_metrics.items():
+            if isinstance(value, str) or value[1] == "%":
+                continue
+            # Write the formatted string to the file
+            f.write(f"# {metric}: {value[0]:.4f} {value[1]}\n")
+
+    print(f"\n{model_type} model metrics")
     for metric, value in evaluation_metrics.items():
-        if type(value) == str:
+        if isinstance(value, str):
             continue
         print(f"# {metric}: {value[0]:.4f} {value[1]}")
 
@@ -149,21 +157,11 @@ if __name__ == "__main__":
     )
 
     metrics_full_model = compare_datasets(
-        model_id, model_type_og, original_csv_path, full_model_pred, "Full model", True
+        model_id, model_type_og, original_csv_path, full_model_pred, True
     )
     metrics_non_quant_pred_impl = compare_datasets(
-        model_id,
-        model_type_non_quant,
-        original_csv_path,
-        non_quant_impl_pred,
-        "Non-quantized implemented model",
-        True,
+        model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, True
     )
     metrics_quant_pred_impl = compare_datasets(
-        model_id,
-        model_type_non_quant,
-        original_csv_path,
-        quant_impl_pred,
-        "Quantized implemented model",
-        True,
+        model_id, model_type_non_quant, original_csv_path, quant_impl_pred, True
     )

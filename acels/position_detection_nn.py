@@ -1,10 +1,11 @@
 # -------------------------------------------------------------------------------------------------
 # Import libraries
-import argparse
-import csv
 import os
-import subprocess
+import io
+import csv
 import sys
+import argparse
+import subprocess
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -215,6 +216,47 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     model.save(model_path)
 
     # -----------------------------------------------------------------------------
+    # Save model details
+    # -----------------------------------------------------------------------------
+    # Retrieving model details
+    optimizer_name = (
+        model.optimizer._name
+        if hasattr(model.optimizer, "_name")
+        else model.optimizer.__class__.__name__
+    )
+    loss = model.loss if hasattr(model, "loss") else "Loss information not available"
+    metrics = (
+        [m.name for m in model.metrics]
+        if hasattr(model, "metrics")
+        else "Metrics information not available"
+    )
+
+    # Prepare to capture the model's summary
+    str_io = io.StringIO()
+    model.summary(print_fn=lambda x: str_io.write(x + "\n"))
+    model_summary = str_io.getvalue()
+
+    # Capturing layer details, specifically activation functions
+    layer_details = ""
+    for layer in model.layers:
+        config = layer.get_config()
+        activation = config.get("activation", "None")
+        layer_details += f"Layer: {layer.name}, Activation: {activation}\n"
+
+    # Full details to write
+    full_details = f"""Model ID: {model_id}\n\n{model_summary}\n{
+        layer_details}\nOptimizer: {optimizer_name}\nLoss: {loss}\nMetrics: {str(metrics)}\n"""
+
+    # Additional details
+    additional_info = f"\nEpochs: {epochs}\nBatch Size: {batch_size}\n\n"
+
+    # Writing to a text file
+    metrics_file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
+    with open(metrics_file_name, "w") as file:
+        file.write(full_details)
+        file.write(additional_info)
+
+    # -----------------------------------------------------------------------------
     # Plot Training Metrics
     # -----------------------------------------------------------------------------
     train_loss = history_1.history["loss"]
@@ -254,7 +296,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
 
     plt.tight_layout()
     plt.savefig(f"acels/figures/{model_id}_training_loss_metrics.svg")
-    plt.show()
+    # plt.show()
 
     # -----------------------------------------------------------------------------
     # Evaluate Model Predictions
@@ -281,7 +323,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     denorm_data = denorm(pred_df, mean[8:], std[8:])
 
     actual_coordinates = target_test_og
-    actual_coordinates_df = pd.DataFrame(actual_coordinates)
+    # actual_coordinates_df = pd.DataFrame(actual_coordinates)
     pred_coordinates = denorm_data[["x", "y", "z"]]
 
     total_test_data = pd.concat([feature_test_og, target_test_og], axis=1)
@@ -299,21 +341,25 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     z2 = pred_coordinates.iloc[:, 2]
 
     eval_metrics_normed = evaluate_regression_model(
-        model_id, model_type, target_test, target_test_pred
+        model_id, f"Normalized_{model_type}", target_test, target_test_pred
     )
+    # Remove unnecessary metrics file
+    if os.path.exists(f"acels/metrics/model_{model_id}_Normalized_og_metrics.txt"):
+        os.remove(f"acels/metrics/model_{model_id}_Normalized_og_metrics.txt")
     eval_metrics_og = evaluate_regression_model(
         model_id, model_type, target_test_og, pred_coordinates
     )
+
     # model_accuracy_normed = eval_metrics_normed["Accuracy Percentage"]
-    model_mae_normed = eval_metrics_normed["MAE"]
-    model_mse_normed = eval_metrics_normed["MSE"]
-    model_rmse_normed = eval_metrics_normed["RMSE"]
-    model_r2_normed = eval_metrics_normed["R²"]
+    model_mae_normed = eval_metrics_normed["MAE"][0]
+    model_mse_normed = eval_metrics_normed["MSE"][0]
+    model_rmse_normed = eval_metrics_normed["RMSE"][0]
+    model_r2_normed = eval_metrics_normed["R²"][0]
     # model_accuracy = eval_metrics_og["Accuracy Percentage"]
-    model_mae = eval_metrics_og["MAE"]
-    model_mse = eval_metrics_og["MSE"]
-    model_rmse = eval_metrics_og["RMSE"]
-    model_r2 = eval_metrics_og["R²"]
+    model_mae = eval_metrics_og["MAE"][0]
+    model_mse = eval_metrics_og["MSE"][0]
+    model_rmse = eval_metrics_og["RMSE"][0]
+    model_r2 = eval_metrics_og["R²"][0]
 
     # Adjusting titles, legends, and positioning of the accuracy text to improve clarity and avoid overlay
     fig, axs = plt.subplots(
@@ -364,7 +410,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     )
 
     plt.savefig(f"acels/figures/{model_id}_model_eval.svg")
-    plt.show()
+    # plt.show()
 
 
 # -----------------------------------------------------------------------------
@@ -614,7 +660,7 @@ if __name__ == "__main__":
             model_id=model_id,
             training_data=training_data,
             model_path=MODEL_TF,
-            epochs=25,
+            epochs=10,
             batch_size=32,
         )
 
