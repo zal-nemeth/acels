@@ -1,11 +1,11 @@
 # -------------------------------------------------------------------------------------------------
 # Import libraries
-import os
-import io
-import csv
-import sys
 import argparse
+import csv
+import io
+import os
 import subprocess
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -104,6 +104,19 @@ def update_variable_names(model_tflite_micro, original_name, new_name="position_
 
 
 def data_processing(input_data):
+    """
+    Processes input data by randomizing its order and converting its type.
+
+    Parameters:
+    - input_data (str): The file path to the dataset to be processed.
+
+    Returns:
+    - data32 (DataFrame): The processed data with randomized order and converted to float32.
+    - train_stats (DataFrame): Basic statistics of the processed data, with each row representing a different statistic and each column representing a feature of the data.
+
+    Example:
+        data, stats = data_processing('path/to/dataset.csv')
+    """
     # -----------------------------------------------------------------------------
     # Data Processing
     # -----------------------------------------------------------------------------
@@ -127,7 +140,31 @@ def data_processing(input_data):
 # Model definition and training
 # -----------------------------------------------------------------------------
 def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32):
+    """
+    Trains a neural network model on provided dataset and evaluates its performance.
 
+    ### Parameters:
+    - model_id (str): Identifier for the model, used for naming output files.
+    - training_data (str): File path to the dataset to be used for training.
+    - model_path (str): Path where the trained model will be saved.
+    - epochs (int, optional): Number of epochs to train the model. Default is 1000.
+    - batch_size (int, optional): Batch size to use during training. Default is 32.
+
+    ### Returns:
+    - None. This function saves the trained model, metrics, and plots to the specified paths.
+
+    ### Example:
+    - train_model('model1', 'path/to/training_data.csv', 'path/to/save/model', epochs=100, batch_size=32) ->
+
+    Trains a model with ID 'model1' using data from 'path/to/training_data.csv', saves it to 'path/to/save/model', and runs for 100 epochs with a batch size of 32.
+
+    ### Note:
+    The input dataset is expected to be in CSV format and contain columns named 's1' to 's8' for features and 'x', 'y', 'z' for targets.
+    The function automatically randomizes the dataset, normalizes it using statistics computed from the training set,
+    and splits it into training (60%), validation (20%), and test (20%) sets.
+    It saves various output files, including model details, training and validation metrics,
+    and plots to visualize training progress and model performance, in directories specified by the model_id and model type.
+    """
     model_type = "og"
     data32, train_stats = data_processing(training_data)
 
@@ -423,6 +460,27 @@ def run_lite_model(
     quant_output_path,
     non_quant_output_path,
 ):
+    """
+    Executes predictions using both quantized and non-quantized TensorFlow Lite models.
+
+    This function loads test data and performs predictions using both a quantized and a non-quantized
+    TensorFlow Lite model. It processes the input features by normalizing them and then converts the
+    normalized features to a format suitable for each model type. After prediction, it denormalizes
+    the outputs back to their original scale. Finally, the predictions from both models are saved to
+    specified output paths in CSV format.
+
+    ### Parameters:
+    - test_data_path (str): The path to the test dataset CSV file.
+    - quant_model_path (str): The file path to the quantized TensorFlow Lite model.
+    - non_quant_model_path (str): The file path to the non-quantized TensorFlow Lite model.
+    - quant_output_path (str): The file path where the quantized model predictions will be saved.
+    - non_quant_output_path (str): The file path where the non-quantized model predictions will be saved.
+
+    ### Note:
+    - The function assumes the first 8 columns of the test data are the input features (s1 to s8) and
+    uses global normalization parameters (mean and standard deviation) for preprocessing.
+    - Output CSV files contain columns ['x', 'y', 'z'] representing the model's predictions.
+    """
     # Load the test data
     test_data = pd.read_csv(test_data_path)
     train_stats = pd.read_csv("acels/data/data_statistics.csv")
@@ -515,7 +573,26 @@ def convert_model(
     conversion_output_path_no_quant,
     conversion_output_path_no_quant_micro,
 ):
+    """
+    Converts a TensorFlow saved model to TensorFlow Lite format, both quantized and non-quantized,
+    and converts them to C source files for use in microcontroller applications.
 
+    This function takes a TensorFlow model saved in the SavedModel format, converts it to both quantized
+    and non-quantized TensorFlow Lite formats, and saves these models to disk. It also includes an option
+    to convert these TensorFlow Lite models into C source files suitable for embedding in microcontroller
+    applications, using the `xxd` tool for hex dumping and custom functions for conversion and variable renaming.
+
+    ### Parameters:
+    - model_id (str): Identifier for the model, used to retrieve specific training data for quantization.
+    - saved_model_path (str): File path to the TensorFlow SavedModel to be converted.
+    - conversion_output_path (str): File path where the quantized TensorFlow Lite model will be saved.
+    - conversion_output_path_micro (str): File path where the C source file for the quantized model will be saved.
+    - conversion_output_path_no_quant (str): File path where the non-quantized TensorFlow Lite model will be saved.
+    - conversion_output_path_no_quant_micro (str): File path where the C source file for the non-quantized model will be saved.
+
+    ### Note:
+    - The function assumes that a representative dataset is available and relevant for the quantization process.
+    """
     feature_train = pd.read_csv(f"acels/data/{model_id}_split_feature_data.csv")
     # Convert the model to the TensorFlow Lite format without quantization
     converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_path)

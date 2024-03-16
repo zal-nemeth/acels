@@ -1,6 +1,6 @@
-import os
 import csv
 import json
+import os
 import time
 
 import numpy as np
@@ -85,6 +85,31 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
 def compare_datasets(
     model_id, model_type, original_csv, predicted_csv, data_name, existing=True
 ):
+    """
+    Compares original dataset coordinates with predicted ones and evaluates the regression model's performance.
+
+    This function loads two datasets: one containing original coordinates and another with predicted coordinates.
+    If the predicted data doesn't exist or is specified to be generated anew, it establishes a serial connection
+    to the microcontroller to collect predicted data based on inputs from the original dataset.
+    After loading or generating the predicted data, it evaluates the regression model's performance using
+    specific evaluation metrics.
+
+    ### Parameters:
+    - model_id (str): Identifier for the model, used for evaluation context.
+    - model_type (str): Type of the model being evaluated.
+    - original_csv (str): File path to the CSV containing the original dataset.
+    - predicted_csv (str): File path to the CSV where the predicted dataset is stored or will be stored.
+    - data_name (str): Descriptive name for the dataset being evaluated, used in evaluation metrics.
+    - existing (bool, optional): Flag indicating if the predicted dataset already exists. Defaults to True.
+
+    ### Returns:
+    - evaluation_metrics (dict): A dictionary containing various evaluation metrics about the regression model's performance.
+
+    ### Note:
+    - If `existing` is False, the function will attempt to generate predicted data by sending data points from the original
+      dataset to a microcontroller via serial communication and reading the responses.
+    - It is assumed that the datasets contain 'x', 'y', and 'z' columns representing coordinates.
+    """
     # Load the datasets
     original_data = pd.read_csv(original_csv, usecols=["x", "y", "z"])
     predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z"])

@@ -62,6 +62,22 @@ def interpolate_ty(r, z):
 
 
 def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
+    """
+    Calculates the currents needed in coils to achieve desired force and torque on a point.
+
+    ### Parameters:
+    - x, y, z (float): Coordinates of the target point.
+    - F_x, F_y, F_z (float): Components of the desired force at the target point.
+    - T_x, T_y (float): Components of the desired torque at the target point.
+
+    ### Returns:
+    - I (np.ndarray): Array of currents for each coil to achieve the desired force and torque.
+
+    ### Algorithm:
+    1. Compute the distance and angle from each coil to the target point.
+    2. Use interpolation functions to calculate forces and torques for these distances and angles.
+    3. Formulate and solve a linear system to find the currents.
+    """
     # Coil center coordinates
     cxi = np.array([-30, 0, 30, -30, 0, 30, -30, 0, 30])
     cyi = np.array([30, 30, 30, 0, 0, 0, -30, -30, -30])
