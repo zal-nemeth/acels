@@ -64,7 +64,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
         "MSE": (mse, "mm²"),
         "RMSE": (rmse, "mm"),
         "R²": (r_squared, ""),
-        "Accuracy Percentage": (accuracy_percentage, "%"),
+        "Accuracy": (accuracy_percentage, "%"),
     }
 
     if average_runtime:
@@ -77,12 +77,15 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     with open(file_name, mode,  encoding='utf-8') as f:
         f.write(f"Model type: {model_type}\n")
         for metric, value in evaluation_metrics.items():
-            if isinstance(value, str) or value[1] == "%":
+            if isinstance(value, str) and average_runtime:
+                f.write(f"Model ID: {model_id}\n")
+                continue
+            if value[1] == "%":
                 continue
             # Write the formatted string to the file
             f.write(f"# {metric}: {value[0]:.4f} {value[1]}\n")
 
-    print(f"\n{model_type} model metrics")
+    print(f"\n{model_type} model metrics:")
     for metric, value in evaluation_metrics.items():
         if isinstance(value, str):
             continue
@@ -159,7 +162,7 @@ def compare_datasets(
     # predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z", "runtime"])
 
     # Load or reload the predicted data
-    predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z", "runtime"])
+    predicted_data = pd.read_csv(predicted_csv)
 
     # Evaluate the regression model
     evaluation_metrics = evaluate_regression_model(
@@ -172,7 +175,7 @@ def compare_datasets(
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "00"
+    model_id = "01"
     data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
@@ -198,9 +201,9 @@ if __name__ == "__main__":
     # metrics_full_model = compare_datasets(
     #     model_id, model_type_og, original_csv_path, full_model_pred, True
     # )
-    metrics_non_quant_pred_impl = compare_datasets(
-        model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
-    )
-    # metrics_quant_pred_impl = compare_datasets(
-    #     model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
+    # metrics_non_quant_pred_impl = compare_datasets(
+    #     model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
     # )
+    metrics_quant_pred_impl = compare_datasets(
+        model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
+    )
