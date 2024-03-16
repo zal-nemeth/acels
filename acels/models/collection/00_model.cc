@@ -10,6 +10,9 @@ model.add(Dense(30, activation="tanh"))
 model.add(Dense(3))
 model.compile(optimizer="nadam", loss="mse", metrics=["mae"])
 
+epochs = 4000
+batch size = 64
+
 Quantized implemented model metrics metrics
 # MAE: 0.110 mm
 # MSE: 0.074 mm²

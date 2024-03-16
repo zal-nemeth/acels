@@ -1,17 +1,18 @@
 import os
+from unittest.mock import MagicMock, call, patch
+
 import numpy as np
 import pandas as pd
 import pytest
 import tensorflow as tf
-from unittest.mock import MagicMock, patch, call
 
 from acels.position_detection_nn import (
-    norm,
-    denorm,
-    install_xxd,
-    evaluate_regression_model,
-    train_model,
     convert_model_to_c_source,
+    denorm,
+    evaluate_regression_model,
+    install_xxd,
+    norm,
+    train_model,
 )
 
 

@@ -433,81 +433,8 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
 
 
 # -----------------------------------------------------------------------------
-# Read existing model
+# Run TensorFlow Lite model
 # -----------------------------------------------------------------------------
-# def read_model(
-#     model_path,
-#     test_data_path,
-#     output_path
-# ):
-#     # Load the test data
-#     # test_data_path = "acels/test_coordinates.csv"
-#     test_data = pd.read_csv(test_data_path)
-#     train_stats = pd.read_csv(f"acels/data/data_statistics.csv")
-
-#     # Separate features and targets
-#     features = test_data.iloc[:, :8].values  # s1 to s8
-#     _ = test_data.iloc[:, 8:].values  # x, y, z
-
-#     mean = train_stats["mean"][:8].values
-#     std = train_stats["std"][:8].values
-#     coord_mean = train_stats["mean"][8:].values
-#     coord_std = train_stats["std"][8:].values
-
-#     print(mean)
-#     print(std)
-#     print(features)
-#     print(len(features))
-
-#     norm_features = norm(features, mean, std)
-#     norm_features32 = norm_features.astype(np.float32)
-
-#     # Load the TFLite model and allocate tensors.
-#     interpreter = tf.lite.Interpreter(model_path=model_path)
-#     interpreter.allocate_tensors()
-
-#     input_details = interpreter.get_input_details()
-#     output_details = interpreter.get_output_details()
-
-#     # Container for predictions
-#     predictions = []
-
-#     for _, input_data in enumerate(norm_features32):
-#         # Quantize the input data
-
-#         input_data_quantized = (
-#             input_data / input_details[0]["quantization"][0]
-#             + input_details[0]["quantization"][1]
-#         ).astype(input_details[0]["dtype"])
-
-#         # Set the tensor to point to the input data
-#         interpreter.set_tensor(input_details[0]["index"], [input_data_quantized])
-
-#         # Run inference
-#         interpreter.invoke()
-
-#         # Get the output data
-#         output_data = interpreter.get_tensor(output_details[0]["index"])[0]
-
-#         # Dequantize the output data if necessary
-#         # Example dequantization, adjust based on your model's quantization parameters
-#         output_data_dequantized = (
-#             output_data - output_details[0]["quantization"][1]
-#         ) * output_details[0]["quantization"][0]
-
-#         predictions.append(output_data_dequantized)
-
-#     denorm_predictions = denorm(predictions, coord_mean, coord_std)
-
-#     # Save predictions to CSV
-#     with open(output_path, mode="w", newline="") as file:
-#         writer = csv.writer(file)
-#         writer.writerow(["x", "y", "z"])  # Adjust column names based on your output
-
-#         for prediction in denorm_predictions:
-#             writer.writerow(prediction)
-
-
 def run_lite_model(
     test_data_path,
     quant_model_path,
