@@ -225,13 +225,13 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     # -----------------------------------------------------------------------------
     # Create model with 8 input, 3 output and 5 hidden layers
     model = tf.keras.Sequential()
-    model.add(Dense(60, activation="tanh", input_shape=(8,)))
-    model.add(Dense(80, activation="tanh"))
-    model.add(Dense(80, activation="tanh"))
-    model.add(Dense(60, activation="tanh"))
-    model.add(Dense(30, activation="tanh"))
+    model.add(Dense(60, activation="relu", input_shape=(8,)))
+    model.add(Dense(80, activation="relu"))
+    model.add(Dense(80, activation="relu"))
+    model.add(Dense(60, activation="relu"))
+    model.add(Dense(30, activation="relu"))
     model.add(Dense(3))
-    model.compile(optimizer="nadam", loss="mse", metrics=["mae"])
+    model.compile(optimizer="RMSprop", loss="mse", metrics=["mae"])
     model.summary()
 
     # -----------------------------------------------------------------------------
@@ -693,9 +693,10 @@ if __name__ == "__main__":
     ###########################
     #    Define Parameters    #
     ###########################
-    model_id = "01"
-    epochs = 1000
+    model_id = "02"
+    epochs = 4000
     batch_size = 32
+    ###########################
     ###########################
 
     MODEL_TF = MODELS_DIR + "model"
