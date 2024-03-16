@@ -102,7 +102,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
 
     # Print and return the evaluation metrics
     evaluation_metrics = {
-        "Model ID":  model_id,
+        "Model ID": model_id,
         "MAE": mae,
         "MSE": mse,
         "RMSE": rmse,
@@ -197,7 +197,10 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
 
     # Print and save to csv for reuse in control software
     print(f"\nData Statistics: {train_stats}")
-    train_stats.to_csv("acels/data/data_statistics.csv", index=True)
+    if "dummy" in model_id:
+        train_stats.to_csv("tests/dummy_data_statistics.csv", index=True)
+    else:
+        train_stats.to_csv("acels/data/data_statistics.csv", index=True)
 
     # Separate Data into Feature and Target Variables
     # The `_og` suffix refers to the original data without normalization
@@ -360,8 +363,12 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     y2 = pred_coordinates.iloc[:, 1]
     z2 = pred_coordinates.iloc[:, 2]
 
-    eval_metrics_normed = evaluate_regression_model(model_id, model_type, target_test, target_test_pred)
-    eval_metrics_og = evaluate_regression_model(model_id, model_type, target_test_og, pred_coordinates)
+    eval_metrics_normed = evaluate_regression_model(
+        model_id, model_type, target_test, target_test_pred
+    )
+    eval_metrics_og = evaluate_regression_model(
+        model_id, model_type, target_test_og, pred_coordinates
+    )
     # model_accuracy_normed = eval_metrics_normed["Accuracy Percentage"]
     model_mae_normed = eval_metrics_normed["MAE"]
     model_mse_normed = eval_metrics_normed["MSE"]
@@ -531,22 +538,26 @@ def run_lite_model(
     output_details_quant = interpreter_quant.get_output_details()
 
     # Get the scale and zero_point for input quantization
-    input_scale, input_zero_point = input_details_quant[0]['quantization']
+    input_scale, input_zero_point = input_details_quant[0]["quantization"]
 
     predictions_quant = []
 
     for input_data in norm_features32:
         # Quantize the input data
-        input_data_quantized = np.round(input_data / input_scale + input_zero_point).astype(input_details_quant[0]['dtype'])
+        input_data_quantized = np.round(
+            input_data / input_scale + input_zero_point
+        ).astype(input_details_quant[0]["dtype"])
 
-        interpreter_quant.set_tensor(input_details_quant[0]["index"], [input_data_quantized])
+        interpreter_quant.set_tensor(
+            input_details_quant[0]["index"], [input_data_quantized]
+        )
         interpreter_quant.invoke()
         output_data = interpreter_quant.get_tensor(output_details_quant[0]["index"])[0]
 
         # Dequantize the output data if needed, similar to the input quantization step but in reverse
-        output_scale, output_zero_point = output_details_quant[0]['quantization']
+        output_scale, output_zero_point = output_details_quant[0]["quantization"]
         output_data_dequantized = (output_data - output_zero_point) * output_scale
-        
+
         predictions_quant.append(output_data_dequantized)
 
     denorm_predictions_quant = denorm(predictions_quant, coord_mean, coord_std)
@@ -566,11 +577,15 @@ def run_lite_model(
 
     predictions_non_quant = []
     for input_data in norm_features32:
-        interpreter_non_quant.set_tensor(input_details_non_quant[0]["index"], [input_data])
+        interpreter_non_quant.set_tensor(
+            input_details_non_quant[0]["index"], [input_data]
+        )
         interpreter_non_quant.invoke()
-        output_data = interpreter_non_quant.get_tensor(output_details_non_quant[0]["index"])[0]
+        output_data = interpreter_non_quant.get_tensor(
+            output_details_non_quant[0]["index"]
+        )[0]
         predictions_non_quant.append(output_data)
-    
+
     denorm_predictions_non_quant = denorm(predictions_non_quant, coord_mean, coord_std)
 
     # Save non-quantized model predictions to CSV
