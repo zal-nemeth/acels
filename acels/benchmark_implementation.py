@@ -25,7 +25,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
 
-    file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
+    file_name = f"acels/metrics/{model_id}model_{model_type}_metrics.txt"
 
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()

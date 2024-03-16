@@ -288,7 +288,7 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
     additional_info = f"\nEpochs: {epochs}\nBatch Size: {batch_size}\n\n"
 
     # Writing to a text file
-    metrics_file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
+    metrics_file_name = f"acels/metrics/{model_id}_model_{model_type}_metrics.txt"
     with open(metrics_file_name, "w") as file:
         file.write(full_details)
         file.write(additional_info)
@@ -381,8 +381,8 @@ def train_model(model_id, training_data, model_path, epochs=1000, batch_size=32)
         model_id, f"Normalized_{model_type}", target_test, target_test_pred
     )
     # Remove unnecessary metrics file
-    if os.path.exists(f"acels/metrics/model_{model_id}_Normalized_og_metrics.txt"):
-        os.remove(f"acels/metrics/model_{model_id}_Normalized_og_metrics.txt")
+    if os.path.exists(f"acels/metrics/{model_id}_model_Normalized_og_metrics.txt"):
+        os.remove(f"acels/metrics/{model_id}_model_Normalized_og_metrics.txt")
     eval_metrics_og = evaluate_regression_model(
         model_id, model_type, target_test_og, pred_coordinates
     )
@@ -690,7 +690,13 @@ if __name__ == "__main__":
     if not os.path.exists(MODELS_DIR):
         os.mkdir(MODELS_DIR)
 
+    ###########################
+    #    Define Parameters    #
+    ###########################
     model_id = "01"
+    epochs = 1000
+    batch_size = 32
+    ###########################
 
     MODEL_TF = MODELS_DIR + "model"
     MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
@@ -737,8 +743,8 @@ if __name__ == "__main__":
             model_id=model_id,
             training_data=training_data,
             model_path=MODEL_TF,
-            epochs=10,
-            batch_size=32,
+            epochs=epochs,
+            batch_size=batch_size,
         )
 
     elif args.read:
