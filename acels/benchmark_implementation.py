@@ -25,11 +25,15 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
     """
 
-    file_name = f"acels/metrics/{model_id}model_{model_type}_metrics.txt"
+    average_runtime = None
+    file_name = f"acels/metrics/{model_id}_model_{model_type}_metrics.txt"
 
     if isinstance(original_data, pd.DataFrame):
         original_data = original_data.to_numpy()
     if isinstance(predicted_data, pd.DataFrame):
+        if 'runtime' in predicted_data.columns:
+            average_runtime = predicted_data['runtime'].mean()
+            predicted_data = predicted_data[["x", "y", "z"]]
         predicted_data = predicted_data.to_numpy()
 
     # Calculate Mean Absolute Error
@@ -63,10 +67,15 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
         "Accuracy Percentage": (accuracy_percentage, "%"),
     }
 
+    if average_runtime:
+        # Add average runtime to metrics
+        evaluation_metrics["Average Runtime"] = (average_runtime, "us")
+
     # Check if file exists to append or write new
     mode = "a" if os.path.exists(file_name) else "w"
 
-    with open(file_name, mode) as f:
+    with open(file_name, mode,  encoding='utf-8') as f:
+        f.write(f"Model type: {model_type}\n")
         for metric, value in evaluation_metrics.items():
             if isinstance(value, str) or value[1] == "%":
                 continue
@@ -83,7 +92,7 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
 
 
 def compare_datasets(
-    model_id, model_type, original_csv, predicted_csv, data_name, existing=True
+    model_id, model_type, original_csv, predicted_csv, existing=True
 ):
     """
     Compares original dataset coordinates with predicted ones and evaluates the regression model's performance.
@@ -99,7 +108,6 @@ def compare_datasets(
     - model_type (str): Type of the model being evaluated.
     - original_csv (str): File path to the CSV containing the original dataset.
     - predicted_csv (str): File path to the CSV where the predicted dataset is stored or will be stored.
-    - data_name (str): Descriptive name for the dataset being evaluated, used in evaluation metrics.
     - existing (bool, optional): Flag indicating if the predicted dataset already exists. Defaults to True.
 
     ### Returns:
@@ -110,9 +118,9 @@ def compare_datasets(
       dataset to a microcontroller via serial communication and reading the responses.
     - It is assumed that the datasets contain 'x', 'y', and 'z' columns representing coordinates.
     """
+
     # Load the datasets
     original_data = pd.read_csv(original_csv, usecols=["x", "y", "z"])
-    predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z"])
 
     # Check if predicted data exists and has more than 5 rows
     if not existing:
@@ -132,8 +140,8 @@ def compare_datasets(
             # Skip header row in input, write header to output
             next(reader)
             writer.writerow(
-                ["x", "y", "z"]
-            )  # Assuming you only want x, y, z in the output
+                ["x", "y", "z", "runtime"]
+            )
 
             for row in reader:
                 # Send s1 through s8 as a comma-separated string, then read the response
@@ -148,9 +156,14 @@ def compare_datasets(
         # Close the serial connection
         ser.close()
 
+    # predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z", "runtime"])
+
+    # Load or reload the predicted data
+    predicted_data = pd.read_csv(predicted_csv, usecols=["x", "y", "z", "runtime"])
+
     # Evaluate the regression model
     evaluation_metrics = evaluate_regression_model(
-        model_id, model_type, original_data, predicted_data, data_name
+        model_id, model_type, original_data, predicted_data
     )
     return evaluation_metrics
 
@@ -159,7 +172,8 @@ def compare_datasets(
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "01"
+    model_id = "00"
+    data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
 
@@ -169,24 +183,24 @@ if __name__ == "__main__":
 
     # Non-quantized results
     model_type_non_quant = "non_quant_impl"
-    non_quant_pred = f"acels/predictions/{model_id}_non_quantized_predictions.csv"
+    non_quant_pred = f"acels\\predictions\\{model_id}_non_quantized_predictions.csv"
     non_quant_impl_pred = (
-        f"acels/predictions/{model_id}_non_quantized_implementation_output.csv"
+        f"acels\\predictions\\{model_id}_non_quantized_impl_preds.csv"
     )
 
     # Quantized results
     model_type_quant = "quant_impl"
     quant_pred = f"acels/predictions/{model_id}_quantized_predictions.csv"
     quant_impl_pred = (
-        f"acels/predictions/{model_id}_quantized_implementation_output.csv"
+        f"acels/predictions/{model_id}_quantized_impl_preds.csv"
     )
 
-    metrics_full_model = compare_datasets(
-        model_id, model_type_og, original_csv_path, full_model_pred, True
-    )
+    # metrics_full_model = compare_datasets(
+    #     model_id, model_type_og, original_csv_path, full_model_pred, True
+    # )
     metrics_non_quant_pred_impl = compare_datasets(
-        model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, True
+        model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
     )
-    metrics_quant_pred_impl = compare_datasets(
-        model_id, model_type_non_quant, original_csv_path, quant_impl_pred, True
-    )
+    # metrics_quant_pred_impl = compare_datasets(
+    #     model_id, model_type_quant, original_csv_path, quant_impl_pred, data_exists
+    # )
