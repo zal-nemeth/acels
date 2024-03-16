@@ -8,9 +8,7 @@ import serial
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-def evaluate_regression_model(
-    model_id, model_type, original_data, predicted_data, data_name
-):
+def evaluate_regression_model(model_id, model_type, original_data, predicted_data):
     """
     Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
     Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
@@ -19,6 +17,8 @@ def evaluate_regression_model(
     Parameters:
     - original_data (numpy.ndarray or pandas.DataFrame): The actual values.
     - predicted_data (numpy.ndarray or pandas.DataFrame): The predicted values by the model.
+    - model_id (str): ID of the model.
+    - model_type (str): Model type i.e. tflite, quantized, non-quantized etc.
 
     Returns:
     - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
@@ -63,11 +63,13 @@ def evaluate_regression_model(
     }
 
     with open(file_name, "w") as f:
-        json.dump(evaluation_metrics, f)
+        json.dump(evaluation_metrics, f, indent=4)
 
-    print(f"{data_name} metrics")
+    print(f"{model_type} model metrics")
     for metric, value in evaluation_metrics.items():
-        print(f"# {metric}: {value[0]:.3f} {value[1]}")
+        if type(value) == str:
+            continue
+        print(f"# {metric}: {value[0]:.4f} {value[1]}")
 
     return evaluation_metrics
 
@@ -123,42 +125,45 @@ def compare_datasets(
 # -------------------------------------------------------------------------------------------
 # Main
 # -------------------------------------------------------------------------------------------
-model_id = "01"
+if __name__ == "__main__":
+    model_id = "01"
 
-original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
+    original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
 
-# Full model Results
-model_type_og = "og"
-full_model_pred = f"acels/predictions/{model_id}_full_model_predictions.csv"
+    # Full model Results
+    model_type_og = "og"
+    full_model_pred = f"acels/predictions/{model_id}_og_predictions.csv"
 
-# Non-quantized results
-model_type_non_quant = "non_quant_impl"
-non_quant_pred = f"acels/predictions/{model_id}_non_quantized_predictions.csv"
-non_quant_impl_pred = (
-    f"acels/predictions/{model_id}_non_quantized_implementation_output.csv"
-)
+    # Non-quantized results
+    model_type_non_quant = "non_quant_impl"
+    non_quant_pred = f"acels/predictions/{model_id}_non_quantized_predictions.csv"
+    non_quant_impl_pred = (
+        f"acels/predictions/{model_id}_non_quantized_implementation_output.csv"
+    )
 
-# Quantized results
-model_type_quant = "quant_impl"
-quant_pred = f"acels/predictions/{model_id}_quantized_predictions.csv"
-quant_impl_pred = f"acels/predictions/{model_id}_quantized_implementation_output.csv"
+    # Quantized results
+    model_type_quant = "quant_impl"
+    quant_pred = f"acels/predictions/{model_id}_quantized_predictions.csv"
+    quant_impl_pred = (
+        f"acels/predictions/{model_id}_quantized_implementation_output.csv"
+    )
 
-metrics_full_model = compare_datasets(
-    model_id, model_type_og, original_csv_path, full_model_pred, "Full model", True
-)
-metrics_non_quant_pred_impl = compare_datasets(
-    model_id,
-    model_type_non_quant,
-    original_csv_path,
-    non_quant_impl_pred,
-    "Non-quantized implemented model",
-    True,
-)
-metrics_quant_pred_impl = compare_datasets(
-    model_id,
-    model_type_non_quant,
-    original_csv_path,
-    quant_impl_pred,
-    "Quantized implemented model",
-    True,
-)
+    metrics_full_model = compare_datasets(
+        model_id, model_type_og, original_csv_path, full_model_pred, "Full model", True
+    )
+    metrics_non_quant_pred_impl = compare_datasets(
+        model_id,
+        model_type_non_quant,
+        original_csv_path,
+        non_quant_impl_pred,
+        "Non-quantized implemented model",
+        True,
+    )
+    metrics_quant_pred_impl = compare_datasets(
+        model_id,
+        model_type_non_quant,
+        original_csv_path,
+        quant_impl_pred,
+        "Quantized implemented model",
+        True,
+    )

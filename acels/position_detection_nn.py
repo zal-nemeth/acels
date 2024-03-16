@@ -2,7 +2,6 @@
 # Import libraries
 import argparse
 import csv
-import json
 import os
 import subprocess
 import sys
@@ -12,7 +11,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras.layers import Dense
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+from acels.benchmark_implementation import evaluate_regression_model
 
 
 # -------------------------------------------------------------------------------------------------
@@ -54,71 +54,6 @@ def denorm(x, mean, std):
     """
     denormed_value = (x * std) + mean
     return denormed_value
-
-
-def evaluate_regression_model(model_id, model_type, original_data, predicted_data):
-    """
-    Evaluates a regression model using Mean Absolute Error (MAE), Mean Squared Error (MSE),
-    Root Mean Squared Error (RMSE), and R-squared (R²), alongside a custom accuracy percentage
-    based on the data range.
-
-    Parameters:
-    - original_data (numpy.ndarray or pandas.DataFrame): The actual values.
-    - predicted_data (numpy.ndarray or pandas.DataFrame): The predicted values by the model.
-    - model_id (str): ID of the model.
-    - model_type (str): Model type i.e. tflite, quantized, non-quantized etc.
-
-    Returns:
-    - A dictionary containing MAE, MSE, RMSE, R², and custom accuracy percentage.
-    """
-
-    file_name = f"acels/metrics/model_{model_id}_{model_type}_metrics.txt"
-
-    if isinstance(original_data, pd.DataFrame):
-        original_data = original_data.to_numpy()
-    if isinstance(predicted_data, pd.DataFrame):
-        predicted_data = predicted_data.to_numpy()
-
-    # Calculate Mean Absolute Error
-    mae = mean_absolute_error(original_data, predicted_data)
-
-    # Calculate Mean Squared Error
-    mse = mean_squared_error(original_data, predicted_data)
-
-    # Calculate Root Mean Squared Error
-    rmse = np.sqrt(mse)
-
-    # Calculate R-squared
-    r_squared = r2_score(original_data, predicted_data)
-
-    # Estimate the range of the data
-    data_range = np.max(original_data) - np.min(original_data)
-
-    # Calculate custom accuracy percentage
-    accuracy = (1 - rmse / data_range) * 100
-    accuracy_percentage = np.clip(
-        accuracy, 0, 100
-    )  # Ensure the percentage is between 0 and 100
-
-    # Print and return the evaluation metrics
-    evaluation_metrics = {
-        "Model ID": model_id,
-        "MAE": mae,
-        "MSE": mse,
-        "RMSE": rmse,
-        "R²": r_squared,
-        "Accuracy Percentage": accuracy_percentage,
-    }
-
-    with open(file_name, "w") as f:
-        json.dump(evaluation_metrics, f, indent=4)
-
-    for metric, value in evaluation_metrics.items():
-        if type(metric) == str:
-            continue
-        print(f"# {metric}: {value:.2f}")
-
-    return evaluation_metrics
 
 
 def install_xxd():
