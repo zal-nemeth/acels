@@ -1,0 +1,45 @@
+Model ID: 87
+
+Model: "sequential_84"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_504 (Dense)           (None, 60)                540       
+                                                                 
+ dense_505 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_506 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_507 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_508 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_509 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_504, Activation: sigmoid
+Layer: dense_505, Activation: sigmoid
+Layer: dense_506, Activation: sigmoid
+Layer: dense_507, Activation: sigmoid
+Layer: dense_508, Activation: sigmoid
+Layer: dense_509, Activation: linear
+
+Optimizer: Adamax
+Loss: <function mean_squared_error at 0x29ce38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: extended
+Epochs: 2801
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.07598137 mm
+# MSE: 0.04839140 mm²
+# RMSE: 0.21998045 mm
+# R²: 0.99924938 

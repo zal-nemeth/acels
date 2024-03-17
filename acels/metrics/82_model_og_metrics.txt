@@ -1,0 +1,45 @@
+Model ID: 82
+
+Model: "sequential_79"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_474 (Dense)           (None, 60)                540       
+                                                                 
+ dense_475 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_476 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_477 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_478 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_479 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_474, Activation: gelu
+Layer: dense_475, Activation: gelu
+Layer: dense_476, Activation: gelu
+Layer: dense_477, Activation: gelu
+Layer: dense_478, Activation: gelu
+Layer: dense_479, Activation: linear
+
+Optimizer: Nadam
+Loss: <function mean_squared_error at 0x29ce38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: extended
+Epochs: 446
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.05409206 mm
+# MSE: 0.06113096 mm²
+# RMSE: 0.24724677 mm
+# R²: 0.99911858 

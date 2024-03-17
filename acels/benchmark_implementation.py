@@ -84,13 +84,13 @@ def evaluate_regression_model(model_id, model_type, original_data, predicted_dat
             if value[1] == "%":
                 continue
             # Write the formatted string to the file
-            f.write(f"# {metric}: {value[0]:.4f} {value[1]}\n")
+            f.write(f"# {metric}: {value[0]:.8f} {value[1]}\n")
 
     print(f"\n{model_type} model metrics:")
     for metric, value in evaluation_metrics.items():
         if isinstance(value, str):
             continue
-        print(f"# {metric}: {value[0]:.4f} {value[1]}")
+        print(f"# {metric}: {value[0]:.5f} {value[1]}")
 
     return evaluation_metrics
 

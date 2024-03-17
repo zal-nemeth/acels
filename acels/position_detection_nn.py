@@ -11,7 +11,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+from keras import Sequential
 from keras.layers import Dense
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.models import load_model
 
 from acels.benchmark_implementation import evaluate_regression_model
 
@@ -139,7 +142,16 @@ def data_processing(input_data):
 # -----------------------------------------------------------------------------
 # Model definition and training
 # -----------------------------------------------------------------------------
-def train_model(model_id, training_data, model_path, activation, optimizer, epochs=1000, batch_size=32):
+def train_model(
+    model_id,
+    training_data,
+    model_path,
+    activation,
+    optimizer,
+    patience,
+    epochs=1000,
+    batch_size=32,
+):
     """
     Trains a neural network model on provided dataset and evaluates its performance.
 
@@ -170,6 +182,7 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
 
     # Print and save to csv for reuse in control software
     print(f"\nData Statistics: {train_stats}")
+    # Add dummy option for testing purposes
     if "dummy" in model_id:
         train_stats.to_csv("tests/dummy_data_statistics.csv", index=True)
     else:
@@ -218,13 +231,37 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
         target, [TRAIN_SPLIT, TEST_SPLIT]
     )
 
+    # Save training data
     feature_train.to_csv(f"acels/data/{model_id}_split_feature_data.csv", index=False)
+
+    # -----------------------------------------------------------------------------
+    # Define Callbacks
+    # -----------------------------------------------------------------------------
+    # Define EarlyStopping callback
+    early_stopping = EarlyStopping(
+        monitor="val_loss",
+        patience=patience,  # Number of epochs with no improvement after which training will be stopped
+        verbose=1,
+        mode="min",
+        # Restores model weights from the epoch with the best value of the monitored quantity.
+        restore_best_weights=True,
+    )
+
+    # Define the ModelCheckpoint callback
+    checkpoint_path = f"{model_path}/{model_id}_best_model.h5"
+    model_checkpoint = ModelCheckpoint(
+        filepath=checkpoint_path,
+        save_best_only=True,
+        monitor="val_loss",
+        mode="min",
+        verbose=1,
+    )
 
     # -----------------------------------------------------------------------------
     # Model Building
     # -----------------------------------------------------------------------------
     # Create model with 8 input, 3 output and 5 hidden layers
-    model = tf.keras.Sequential()
+    model = Sequential()
     model.add(Dense(60, activation=activation, input_shape=(8,)))
     model.add(Dense(80, activation=activation))
     model.add(Dense(80, activation=activation))
@@ -244,38 +281,44 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
         epochs=epochs,
         batch_size=batch_size,
         validation_data=(feature_validate, target_validate),
+        callbacks=[early_stopping, model_checkpoint],
     )
     # Check Mean Absolute Error
     _, test_mae = model.evaluate(feature_test, target_test, verbose=0)
     print("Testing set Mean Abs Error: {:5.3f} mm".format(test_mae))
 
-    # Save model to disk
-    model.save(model_path)
+    # Assuming checkpoint_path is defined as the path to the best model saved
 
+    # Load the best model
+    best_model = load_model(checkpoint_path)
     # -----------------------------------------------------------------------------
     # Save model details
     # -----------------------------------------------------------------------------
     # Retrieving model details
     optimizer_name = (
-        model.optimizer._name
-        if hasattr(model.optimizer, "_name")
-        else model.optimizer.__class__.__name__
+        best_model.optimizer._name
+        if hasattr(best_model.optimizer, "_name")
+        else best_model.optimizer.__class__.__name__
     )
-    loss = model.loss if hasattr(model, "loss") else "Loss information not available"
+    loss = (
+        best_model.loss
+        if hasattr(best_model, "loss")
+        else "Loss information not available"
+    )
     metrics = (
-        [m.name for m in model.metrics]
-        if hasattr(model, "metrics")
+        [m.name for m in best_model.metrics]
+        if hasattr(best_model, "metrics")
         else "Metrics information not available"
     )
 
     # Prepare to capture the model's summary
     str_io = io.StringIO()
-    model.summary(print_fn=lambda x: str_io.write(x + "\n"))
+    best_model.summary(print_fn=lambda x: str_io.write(x + "\n"))
     model_summary = str_io.getvalue()
 
     # Capturing layer details, specifically activation functions
     layer_details = ""
-    for layer in model.layers:
+    for layer in best_model.layers:
         config = layer.get_config()
         activation = config.get("activation", "None")
         layer_details += f"Layer: {layer.name}, Activation: {activation}\n"
@@ -285,11 +328,19 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
         layer_details}\nOptimizer: {optimizer_name}\nLoss: {loss}\nMetrics: {str(metrics)}\n"""
 
     # Additional details
-    additional_info = f"\nEpochs: {epochs}\nBatch Size: {batch_size}\n\n"
+    if early_stopping.stopped_epoch == 0:
+        stopped_epoch = epochs
+    else:
+        stopped_epoch = early_stopping.stopped_epoch
+    if "trimmed" in training_data:
+        data_type = "trimmed"
+    elif "extended" in training_data:
+        data_type = "extended"
+    additional_info = f"\nDataset: {data_type}\nEpochs: {stopped_epoch}\nBatch Size: {batch_size}\nPatience: {patience}\n\n"
 
     # Writing to a text file
     metrics_file_name = f"acels/metrics/{model_id}_model_{model_type}_metrics.txt"
-    with open(metrics_file_name, "w") as file:
+    with open(metrics_file_name, "w", encoding="utf-8") as file:
         file.write(full_details)
         file.write(additional_info)
 
@@ -339,9 +390,9 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
     # Evaluate Model Predictions
     # -----------------------------------------------------------------------------
     # Calculate and print the loss on our test dataset
-    _, test_mae = model.evaluate(feature_test, target_test)
+    _, test_mae = best_model.evaluate(feature_test, target_test)
     # Make predictions based on our test dataset
-    target_test_pred = model.predict(feature_test)
+    target_test_pred = best_model.predict(feature_test)
 
     # scatter3D requires x, y, and z to be one-dimensional arrays
     norm_x = target_test.iloc[:, 0]
@@ -408,11 +459,9 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
     )
 
     # Normalized model predictions plot
+    axs[0].scatter3D(norm_x, norm_y, norm_z, c="blue", s=15, label="Actual Values")
     axs[0].scatter3D(
-        norm_x, norm_y, norm_z, marker="x", c="blue", s=15, label="Actual Values"
-    )
-    axs[0].scatter3D(
-        norm_x2, norm_y2, norm_z2, c="red", s=8, alpha=0.5, label="Model Predictions"
+        norm_x2, norm_y2, norm_z2, c="red", s=6, alpha=0.5, label="Model Predictions"
     )
     axs[0].set_title("Normalized Model Predictions")
     axs[0].set_xlabel("X")
@@ -422,7 +471,7 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
 
     # Denormalized model predictions plot
     axs[1].scatter3D(x, y, z, c="blue", s=16, label="Actual Values")
-    axs[1].scatter3D(x2, y2, z2, c="red", s=8, alpha=0.5, label="Model Predictions")
+    axs[1].scatter3D(x2, y2, z2, c="red", s=6, alpha=0.5, label="Model Predictions")
     axs[1].set_title("Denormalized Model Predictions")
     axs[1].set_xlabel("X (mm)")
     axs[1].set_ylabel("Y (mm)")
@@ -448,6 +497,77 @@ def train_model(model_id, training_data, model_path, activation, optimizer, epoc
 
     plt.savefig(f"acels/figures/{model_id}_model_eval.svg")
     # plt.show()
+    # TODO: Add a less hacky way of taking out the mae from the fucntion,
+    # perhaps add it as a class attribute
+    return model_mae
+
+
+# -----------------------------------------------------------------------------
+# Model Conversion
+# -----------------------------------------------------------------------------
+def convert_model(
+    model_id,
+    saved_model_path,
+    conversion_output_path,
+    conversion_output_path_micro,
+    conversion_output_path_no_quant,
+    conversion_output_path_no_quant_micro,
+):
+    """
+    Converts a TensorFlow saved model to TensorFlow Lite format, both quantized and non-quantized,
+    and converts them to C source files for use in microcontroller applications.
+
+    ### Parameters:
+    - model_id (str): ID for the model, used to retrieve specific training data for quantization.
+    - saved_model_path (str): File path to the TensorFlow SavedModel to be converted.
+    - conversion_output_path (str): File path where the quantized TensorFlow Lite model will be saved.
+    - conversion_output_path_micro (str): File path where the C source file for the quantized model will be saved.
+    - conversion_output_path_no_quant (str): File path where the non-quantized TensorFlow Lite model will be saved.
+    - conversion_output_path_no_quant_micro (str): File path where the C source file for the non-quantized model will be saved.
+
+    ### Note:
+    - The function assumes that a representative dataset is available and relevant for
+    the quantization process.
+    """
+    feature_train = pd.read_csv(f"acels/data/{model_id}_split_feature_data.csv")
+    # Convert the model to the TensorFlow Lite format without quantization
+    best_model_path = f"{saved_model_path}/{model_id}_best_model.h5"
+    model = load_model(best_model_path)
+    converter = tf.lite.TFLiteConverter.from_keras_model(model)
+    model_no_quant_tflite = converter.convert()
+    # Save the model to disk
+    open(conversion_output_path_no_quant, "wb").write(model_no_quant_tflite)
+
+    # install_xxd() # Disable if using Mac
+    convert_model_to_c_source(
+        conversion_output_path_no_quant, conversion_output_path_no_quant_micro
+    )
+    update_variable_names(
+        conversion_output_path_no_quant_micro, conversion_output_path_no_quant
+    )
+
+    # Convert the model to the TensorFlow Lite format with quantization
+    def representative_dataset():
+        for _ in range(500):
+            yield ([feature_train.astype(np.float32)])
+
+    # Set the optimization flag.
+    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+
+    # Enforce integer only quantization
+    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+    converter.inference_input_type = tf.int8
+    converter.inference_output_type = tf.int8
+    # Provide a representative dataset to ensure we quantize correctly.
+    converter.representative_dataset = representative_dataset
+    model_tflite = converter.convert()
+
+    # Save the model to disk
+    open(conversion_output_path, "wb").write(model_tflite)
+
+    # install_xxd() # Disable if using Mac
+    convert_model_to_c_source(conversion_output_path, conversion_output_path_micro)
+    update_variable_names(conversion_output_path_micro, conversion_output_path)
 
 
 # -----------------------------------------------------------------------------
@@ -529,7 +649,7 @@ def run_lite_model(
     denorm_predictions_quant = denorm(predictions_quant, coord_mean, coord_std)
 
     # Save quantized model predictions to CSV
-    with open(quant_output_path, mode="w", newline="") as file:
+    with open(quant_output_path, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["x", "y", "z"])
         for prediction in denorm_predictions_quant:
@@ -555,81 +675,11 @@ def run_lite_model(
     denorm_predictions_non_quant = denorm(predictions_non_quant, coord_mean, coord_std)
 
     # Save non-quantized model predictions to CSV
-    with open(non_quant_output_path, mode="w", newline="") as file:
+    with open(non_quant_output_path, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(["x", "y", "z"])
         for prediction in denorm_predictions_non_quant:
             writer.writerow(prediction)
-
-
-# -----------------------------------------------------------------------------
-# Model Conversion
-# -----------------------------------------------------------------------------
-def convert_model(
-    model_id,
-    saved_model_path,
-    conversion_output_path,
-    conversion_output_path_micro,
-    conversion_output_path_no_quant,
-    conversion_output_path_no_quant_micro,
-):
-    """
-    Converts a TensorFlow saved model to TensorFlow Lite format, both quantized and non-quantized,
-    and converts them to C source files for use in microcontroller applications.
-
-    This function takes a TensorFlow model saved in the SavedModel format, converts it to both quantized
-    and non-quantized TensorFlow Lite formats, and saves these models to disk. It also includes an option
-    to convert these TensorFlow Lite models into C source files suitable for embedding in microcontroller
-    applications, using the `xxd` tool for hex dumping and custom functions for conversion and variable renaming.
-
-    ### Parameters:
-    - model_id (str): Identifier for the model, used to retrieve specific training data for quantization.
-    - saved_model_path (str): File path to the TensorFlow SavedModel to be converted.
-    - conversion_output_path (str): File path where the quantized TensorFlow Lite model will be saved.
-    - conversion_output_path_micro (str): File path where the C source file for the quantized model will be saved.
-    - conversion_output_path_no_quant (str): File path where the non-quantized TensorFlow Lite model will be saved.
-    - conversion_output_path_no_quant_micro (str): File path where the C source file for the non-quantized model will be saved.
-
-    ### Note:
-    - The function assumes that a representative dataset is available and relevant for the quantization process.
-    """
-    feature_train = pd.read_csv(f"acels/data/{model_id}_split_feature_data.csv")
-    # Convert the model to the TensorFlow Lite format without quantization
-    converter = tf.lite.TFLiteConverter.from_saved_model(saved_model_path)
-    model_no_quant_tflite = converter.convert()
-    # Save the model to disk
-    open(conversion_output_path_no_quant, "wb").write(model_no_quant_tflite)
-
-    install_xxd()
-    convert_model_to_c_source(
-        conversion_output_path_no_quant, conversion_output_path_no_quant_micro
-    )
-    update_variable_names(
-        conversion_output_path_no_quant_micro, conversion_output_path_no_quant
-    )
-
-    # Convert the model to the TensorFlow Lite format with quantization
-    def representative_dataset():
-        for _ in range(500):
-            yield ([feature_train.astype(np.float32)])
-
-    # Set the optimization flag.
-    converter.optimizations = [tf.lite.Optimize.DEFAULT]
-
-    # Enforce integer only quantization
-    converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
-    converter.inference_input_type = tf.int8
-    converter.inference_output_type = tf.int8
-    # Provide a representative dataset to ensure we quantize correctly.
-    converter.representative_dataset = representative_dataset
-    model_tflite = converter.convert()
-
-    # Save the model to disk
-    open(conversion_output_path, "wb").write(model_tflite)
-
-    install_xxd()
-    convert_model_to_c_source(conversion_output_path, conversion_output_path_micro)
-    update_variable_names(conversion_output_path_micro, conversion_output_path)
 
 
 # -----------------------------------------------------------------------------
@@ -638,26 +688,13 @@ def convert_model(
 def show_help():
     help_message = """
     Usage: python script_name.py [OPTIONS]
-    
+
     Options:
-    -t, --train                         Start training a new model. Requires --training_data and --model_path.
-        --training_data PATH            Path to the training data.
-        --model_path PATH               Path where the trained model will be saved.
-        --epochs EPOCHS                 Number of epochs (optional, default=1000).
-        --batch_size BATCH_SIZE         Batch size (optional, default=32).
-
-    -c, --convert                       Convert model for embedded use. Requires --saved_model_path and --conversion_output_path.
-        --saved_model_path PATH         Path to saved model (optional, default="acels/models/model").
-        --conversion_output_path PATH   Output path for the converted model (optional, default="acels/models/model.tflite").
-
-    -r, --read                          Read and execute an existing model. Requires --test_data_path, --model_path, and --output_path.
-        --test_data_path PATH           Path to test data (optional, default="acels/test_coordinates.csv").
-        --model_path PATH               Path to model (optional, default="acels/models/model.tflite").
-        --output_path PATH              Output path for predictions (optional, default="acels/quantized_predictions.csv").
-
-    -a, --all                           Run all. Includes training, conversion and running the lite version of the model.
-
-    -h, --help                          Show this help message and exit.
+    -t, --train        Start training a new model.
+    -c, --convert      Convert model for embedded use.
+    -r, --run          Run and execute an existing model.
+    -a, --all          Run all. Includes training and conversion to TFLite version.
+    -h, --help         Show this help message and exit.
     """
     print(help_message)
 
@@ -674,10 +711,10 @@ if __name__ == "__main__":
         "-c", "--convert", action="store_true", help="Convert model for embedded use"
     )
     parser.add_argument(
-        "-r", "--read", action="store_true", help="Read and execute an existing model"
+        "-r", "--run", action="store_true", help="Run and execute TFLite model"
     )
     parser.add_argument(
-        "-a", "--all", action="store_true", help="Run all (train, convert, run)"
+        "-a", "--all", action="store_true", help="Run all (train and convert)"
     )
     parser.add_argument(
         "-h", "--help", action="store_true", help="Show help message and exit."
@@ -694,37 +731,35 @@ if __name__ == "__main__":
     if not os.path.exists(MODELS_DIR):
         os.mkdir(MODELS_DIR)
 
-    ###########################
-    #    Define Parameters    #
-    ###########################
+    ###################################################
+    #############    Define Parameters    #############
+    ###################################################
     model_id = "03"
     model_id_int = 3
-    epochs = 1
+    epochs = 3000
     batch_size = 32
+    patiences = [150]
     activations = [
-        "relu",
-        "selu",
-        "tanh",
-        "sigmoid",
-        "softmax",
-        "swish",
-        "softplus",
-        "softsign",
+        # "relu",
+        # "selu",
+        # "tanh",
+        # "sigmoid",
+        # "softmax",
+        # "swish",
         "hard_sigmoid",
         "gelu",
         "elu",
     ]
     optimizers = [
-        "RMSprop",
-        "adam",
-        "nadam",
+        # "RMSprop",
+        # "adam",
+        # "nadam",
         "adamax",
         "adagrad",
-        "ftrl",
         "sgd",
     ]
-    ###########################
-    ###########################
+    ###################################################
+    ###################################################
 
     MODEL_TF = MODELS_DIR + f"{model_id}_model"
     MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
@@ -732,7 +767,8 @@ if __name__ == "__main__":
     MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"
     MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
 
-    training_data = "acels/data/position_data_float_xyz_extended.csv"
+    training_data_ext = "acels/data/position_data_float_xyz_extended.csv"
+    training_data_trm = "acels/data/position_dataset_trimmed.csv"
     test_data = f"acels/data/{model_id}_test_coordinates.csv"
     quantized_output_path = f"acels/predictions/{model_id}_quantized_predictions.csv"
     non_quantized_output_path = (
@@ -757,7 +793,7 @@ if __name__ == "__main__":
         if choice == "1":
             args.train = True
         elif choice == "2":
-            args.convert
+            args.convert = True
         elif choice == "3":
             args.read = True
         elif choice == "4":
@@ -770,12 +806,13 @@ if __name__ == "__main__":
     if args.help:
         show_help()
     elif args.train:
-        train_model(
+        model_mae = train_model(
             model_id=model_id,
-            training_data=training_data,
+            training_data=training_data_ext,
             model_path=MODEL_TF,
             activation="tanh",
             optimizer="nadam",
+            patience=100,
             epochs=epochs,
             batch_size=batch_size,
         )
@@ -790,7 +827,7 @@ if __name__ == "__main__":
             MODEL_NO_QUANT_TFLITE_MICRO,
         )
 
-    elif args.read:
+    elif args.run:
         run_lite_model(
             test_data_path=test_data,
             quant_model_path=MODEL_TFLITE,
@@ -798,43 +835,46 @@ if __name__ == "__main__":
             quant_output_path=quantized_output_path,
             non_quant_output_path=non_quantized_output_path,
         )
-    
+
     elif args.all:
-        for optimizer in optimizers:
-            for activation in activations:
-                model_id = f"{model_id_int:02d}"
-                MODEL_TF = MODELS_DIR + f"{model_id}_model"
-                MODEL_NO_QUANT_TFLITE = MODELS_DIR + f"{model_id}_model_no_quant.tflite"
-                MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
-                MODEL_NO_QUANT_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model_no_quant.cc"
-                MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
-                test_data = f"acels/data/{model_id}_test_coordinates.csv"
-                quantized_output_path = f"acels/predictions/{model_id}_quantized_predictions.csv"
-                non_quantized_output_path = (
-                    f"acels/predictions/{model_id}_non_quantized_predictions.csv"
-                )
-                train_model(
-                    model_id=model_id,
-                    training_data=training_data,
-                    model_path=MODEL_TF,
-                    activation=activation,
-                    optimizer=optimizer,
-                    epochs=epochs,
-                    batch_size=batch_size,
-                )
-                convert_model(
-                    model_id,
-                    MODEL_TF,
-                    MODEL_TFLITE,
-                    MODEL_TFLITE_MICRO,
-                    MODEL_NO_QUANT_TFLITE,
-                    MODEL_NO_QUANT_TFLITE_MICRO,
-                )
-                # run_lite_model(
-                #     test_data_path=test_data,
-                #     quant_model_path=MODEL_TFLITE,
-                #     non_quant_model_path=MODEL_NO_QUANT_TFLITE,
-                #     quant_output_path=quantized_output_path,
-                #     non_quant_output_path=non_quantized_output_path,
-                # )
-                model_id_int += 1
+        for patience in patiences:
+            for optimizer in optimizers:
+                for activation in activations:
+                    model_id = f"{model_id_int:02d}"
+                    MODEL_TF = MODELS_DIR + "model"
+                    MODEL_NO_QUANT_TFLITE = (
+                        MODELS_DIR + f"{model_id}_model_no_quant.tflite"
+                    )
+                    MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
+                    MODEL_NO_QUANT_TFLITE_MICRO = (
+                        MODELS_DIR + f"{model_id}_model_no_quant.cc"
+                    )
+                    MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
+                    test_data = f"acels/data/{model_id}_test_coordinates.csv"
+                    quantized_output_path = (
+                        f"acels/predictions/{model_id}_quantized_predictions.csv"
+                    )
+                    non_quantized_output_path = (
+                        f"acels/predictions/{model_id}_non_quantized_predictions.csv"
+                    )
+                    model_mae = train_model(
+                        model_id=model_id,
+                        training_data=training_data_ext,
+                        model_path=MODEL_TF,
+                        activation=activation,
+                        optimizer=optimizer,
+                        patience=patience,
+                        epochs=epochs,
+                        batch_size=batch_size,
+                    )
+                    if model_mae <= 0.1:
+                        convert_model(
+                            model_id,
+                            MODEL_TF,
+                            MODEL_TFLITE,
+                            MODEL_TFLITE_MICRO,
+                            MODEL_NO_QUANT_TFLITE,
+                            MODEL_NO_QUANT_TFLITE_MICRO,
+                        )
+
+                    model_id_int += 1

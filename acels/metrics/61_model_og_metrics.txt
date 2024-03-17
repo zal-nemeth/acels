@@ -1,0 +1,45 @@
+Model ID: 61
+
+Model: "sequential_58"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_348 (Dense)           (None, 60)                540       
+                                                                 
+ dense_349 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_350 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_351 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_352 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_353 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_348, Activation: softmax
+Layer: dense_349, Activation: softmax
+Layer: dense_350, Activation: softmax
+Layer: dense_351, Activation: softmax
+Layer: dense_352, Activation: softmax
+Layer: dense_353, Activation: linear
+
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x29ce38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: extended
+Epochs: 0
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.18661121 mm
+# MSE: 0.22313579 mm²
+# RMSE: 0.47237251 mm
+# R²: 0.99634960 
