@@ -735,27 +735,27 @@ if __name__ == "__main__":
     #############    Define Parameters    #############
     ###################################################
     model_id = "03"
-    model_id_int = 3
+    model_id_int = 94
     epochs = 3000
     batch_size = 32
-    patiences = [150]
+    patiences = [25, 50]
     activations = [
-        # "relu",
-        # "selu",
-        # "tanh",
-        # "sigmoid",
-        # "softmax",
-        # "swish",
+        "relu",
+        "selu",
+        "tanh",
+        "sigmoid",
+        "softmax",
+        "swish",
         "hard_sigmoid",
         "gelu",
         "elu",
     ]
     optimizers = [
-        # "RMSprop",
-        # "adam",
-        # "nadam",
+        "RMSprop",
+        "adam",
+        "nadam",
         "adamax",
-        "adagrad",
+        # "adagrad",
         "sgd",
     ]
     ###################################################
@@ -859,7 +859,7 @@ if __name__ == "__main__":
                     )
                     model_mae = train_model(
                         model_id=model_id,
-                        training_data=training_data_ext,
+                        training_data=training_data_trm,
                         model_path=MODEL_TF,
                         activation=activation,
                         optimizer=optimizer,
@@ -867,7 +867,7 @@ if __name__ == "__main__":
                         epochs=epochs,
                         batch_size=batch_size,
                     )
-                    if model_mae <= 0.1:
+                    if model_mae <= 0.7:
                         convert_model(
                             model_id,
                             MODEL_TF,
