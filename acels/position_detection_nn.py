@@ -735,10 +735,10 @@ if __name__ == "__main__":
     #############    Define Parameters    #############
     ###################################################
     model_id = "03"
-    model_id_int = 94
+    model_id_int = 103
     epochs = 3000
     batch_size = 32
-    patiences = [25, 50]
+    patiences = [50, 150]
     activations = [
         "relu",
         "selu",
@@ -751,7 +751,7 @@ if __name__ == "__main__":
         "elu",
     ]
     optimizers = [
-        "RMSprop",
+        # "RMSprop",
         "adam",
         "nadam",
         "adamax",
@@ -867,7 +867,7 @@ if __name__ == "__main__":
                         epochs=epochs,
                         batch_size=batch_size,
                     )
-                    if model_mae <= 0.7:
+                    if model_mae <= 0.07:
                         convert_model(
                             model_id,
                             MODEL_TF,
