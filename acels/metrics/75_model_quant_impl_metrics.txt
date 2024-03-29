@@ -1,0 +1,7 @@
+Model type: quant_impl
+Model ID: 75
+# MAE: 0.11877485 mm
+# MSE: 0.04579702 mm²
+# RMSE: 0.21400239 mm
+# R²: 0.99920557 
+# Average Runtime: 163.78894109 us

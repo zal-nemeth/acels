@@ -1,0 +1,7 @@
+Model type: non_quant_impl
+Model ID: 24
+# MAE: 0.03764004 mm
+# MSE: 0.04094236 mm²
+# RMSE: 0.20234218 mm
+# R²: 0.99942343 
+# Average Runtime: 633.04228406 us

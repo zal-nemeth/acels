@@ -734,8 +734,8 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "03"
-    model_id_int = 103
+    model_id = "150"
+    model_id_int = 150
     epochs = 3000
     batch_size = 32
     patiences = [50, 150]
@@ -795,7 +795,7 @@ if __name__ == "__main__":
         elif choice == "2":
             args.convert = True
         elif choice == "3":
-            args.read = True
+            args.run = True
         elif choice == "4":
             args.all = True
         elif choice == "5":

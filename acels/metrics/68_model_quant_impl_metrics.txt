@@ -1,0 +1,8 @@
+Model type: quant_impl
+Model ID: 68
+# MAE: 0.09087 mm
+# MSE: 0.05791 mm²
+# RMSE: 0.24065 mm
+# R²: 0.99910
+# Accuracy: 99.39837 %
+# Average Runtime: 1095.18504 us
