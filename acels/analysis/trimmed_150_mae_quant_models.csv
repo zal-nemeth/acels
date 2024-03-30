@@ -1,0 +1,4 @@
+Activation,Adam,Nadam
+sigmoid,0.16883078,0.20906522
+swish,0.21554554,
+tanh,0.08291554,0.10581906

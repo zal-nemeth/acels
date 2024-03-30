@@ -1,0 +1,1 @@
+It is recommended that all Arduino scripts are run through the Arduino IDE.
