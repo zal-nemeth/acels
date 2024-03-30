@@ -1,0 +1,10 @@
+Model ID: 14, MAE: 0.07732683, Runtime: 1130.9194073 us
+Model ID: 141, MAE: 0.08291554, Runtime: 1152.12082958 us
+Model ID: 68, MAE: 0.09087, Runtime: 1095.18504 us
+Model ID: 23, MAE: 0.09844718, Runtime: 1195.25984821 us
+Model ID: 59, MAE: 0.10173473, Runtime: 1158.60028912 us
+Model ID: 86, MAE: 0.10429225, Runtime: 1199.1290206 us
+Model ID: 150, MAE: 0.10581906, Runtime: 1165.36880072 us
+Model ID: 00, MAE: 0.1095, Runtime: 912.2085 us
+Model ID: 105, MAE: 0.11293057, Runtime: 1196.1902615 us
+Model ID: 05, MAE: 0.11371281, Runtime: 1147.3230936 us
