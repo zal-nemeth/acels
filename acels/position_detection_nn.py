@@ -16,7 +16,7 @@ from keras.layers import Dense
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.models import load_model
 
-from acels.benchmark_implementation import evaluate_regression_model
+from acels.benchmark_model_impl import evaluate_regression_model
 
 
 # -------------------------------------------------------------------------------------------------

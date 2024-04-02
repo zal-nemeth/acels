@@ -5,3 +5,10 @@ Model ID: 151
 # RMSE: 0.13735227 mm
 # R²: 0.99972552 
 # Average Runtime: 633.65374211 us
+Model type: non_quant_impl
+Model ID: 151
+# MAE: 0.04132552 mm
+# MSE: 0.01440466 mm²
+# RMSE: 0.12001941 mm
+# R²: 0.99978444 
+# Average Runtime: 1114.81514878 us

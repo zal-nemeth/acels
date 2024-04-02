@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from acels.benchmark_implementation import compare_datasets, evaluate_regression_model
+from acels.benchmark_model_impl import compare_datasets, evaluate_regression_model
 
 
 @patch("acels.benchmark_implementation.pd.read_csv")

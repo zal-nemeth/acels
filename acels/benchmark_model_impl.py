@@ -172,7 +172,7 @@ def compare_datasets(model_id, model_type, original_csv, predicted_csv, existing
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "151"
+    model_id = "141"
     data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
@@ -185,6 +185,7 @@ if __name__ == "__main__":
     model_type_non_quant = "non_quant_impl"
     non_quant_pred = f"acels\\predictions\\{model_id}_non_quantized_predictions.csv"
     non_quant_impl_pred = f"acels\\predictions\\{model_id}_non_quantized_impl_preds.csv"
+    non_quant_impl_pred = f"output_data_141_new.csv"
 
     # Quantized results
     model_type_quant = "quant_impl"
