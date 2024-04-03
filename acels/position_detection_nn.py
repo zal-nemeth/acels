@@ -12,8 +12,8 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras import Sequential
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 from keras.layers import Dense
-from keras.callbacks import ModelCheckpoint, EarlyStopping
 from keras.models import load_model
 
 from acels.benchmark_model_impl import evaluate_regression_model

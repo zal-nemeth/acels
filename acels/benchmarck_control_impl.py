@@ -15,5 +15,9 @@ if __name__ == "__main__":
     non_quant_impl_pred = f"acels\\full_design_output_{model_id}.csv"
 
     metrics_non_quant_pred_impl = compare_datasets(
-        model_id, model_type_non_quant, original_csv_path, non_quant_impl_pred, data_exists
+        model_id,
+        model_type_non_quant,
+        original_csv_path,
+        non_quant_impl_pred,
+        data_exists,
     )
