@@ -6,7 +6,7 @@ import serial
 
 
 def send_xyz_and_get_average_runtime(input_csv_path):
-    ser = serial.Serial("COM4", 9600)  # Replace 'COM_PORT' with your actual COM port
+    ser = serial.Serial("COM4", 9600)
     time.sleep(2)  # Wait for the Arduino to reset
 
     # Function to send x, y, z values to Arduino

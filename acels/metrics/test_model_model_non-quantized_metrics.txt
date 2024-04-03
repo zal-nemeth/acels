@@ -1,0 +1,35 @@
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
+Model type: non-quantized
+# MAE: 0.50000000 mm
+# MSE: 0.37500000 mm²
+# RMSE: 0.61237244 mm
+# R²: 0.94860814 
