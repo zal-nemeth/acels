@@ -58,5 +58,31 @@ You can also run `poetry shell` which opens a poetry environment within the term
 - **process_dataset.py**: Processes datasets to remove duplicates and clean data.
 
 ## Usage
+### Arduino Integration
 
-To use the A.C.E.L.S package, please refer to the individual script documentation for detailed instructions on each tool's purpose and usage.
+The `arduino` folder includes software for hardware integration for running and benchmarking the system. These scripts are designed for execution within the Arduino IDE and cover different aspects of the system:
+
+- **acels_software_full**: Implements the full system integration, controlling the electromagnetic levitation process comprehensively including the position detection and the force-to-current matrix transfomration.
+- **position_detection_non_quant**: Software for running and benchmarking non-quantized neural network models, focusing on position detection without model quantization.
+- **position_detection_quantized**: Handles the quantized models, optimizing performance and accuracy in hardware implementation.
+
+### Analysis
+The `analysis` folder contains detailed data on runtime and accuracy metrics for various models. This includes information on the optimizers and activation functions used, along with lists of the top 10 fastest and most accurate models, both quantized and non-quantized.
+
+### Metrics
+Located in the `metrics` folder, you'll find performance metrics for both the original trained models and their integrated counterparts. This data is vital for understanding the effectiveness of the system and guiding further optimizations.
+
+### Data
+The `data` folder houses testing data and statistical analyses for each model. This information is used for evaluating model performance and for use in further training and validation processes.
+
+### Figures
+Training performance and final prediction plots are stored in the `figures` folder. These visuals are key for assessing training progress and comparing actual results against model predictions.
+
+### Models
+Trained models are kept within the `models` folder. This directory serves as a repository for all developed models, ensuring they are easily accessible for evaluation, benchmarking, and implementation.
+
+### Predictions
+Finally, the `predictions` folder stores the results from both PC-based runs and actual hardware implementation tests. This data provides insight into the practical effectiveness of the models in real-world scenarios.
+
+### Note on Arduino Software
+It is recommended to run the Arduino integration software directly from the Arduino IDE to ensure proper functionality and compatibility with the hardware.
