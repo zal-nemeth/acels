@@ -36,54 +36,54 @@ SimpleKalmanFilter filter8(5, 5, 0.01);
 // Change mean and std values based on dataset used for model training
 // ----------------------------------------------------------------------
 // Extended Dataset Statistics
-float mean_s1 = 431.5683288574219;
-float mean_s2 = 352.7138366699219;
-float mean_s3 = 402.7107238769531;
-float mean_s4 = 350.7831726074219;
-float mean_s5 = 331.1814270019531;
-float mean_s6 = 379.517822265625;
-float mean_s7 = 314.7926330566406;
-float mean_s8 = 378.5710754394531;
-float mean_x = -0.16732923686504364;
-float mean_y = -0.14998193085193634;
-float mean_z = 2.568124294281006;
+// float mean_s1 = 431.5683288574219;
+// float mean_s2 = 352.7138366699219;
+// float mean_s3 = 402.7107238769531;
+// float mean_s4 = 350.7831726074219;
+// float mean_s5 = 331.1814270019531;
+// float mean_s6 = 379.517822265625;
+// float mean_s7 = 314.7926330566406;
+// float mean_s8 = 378.5710754394531;
+// float mean_x = -0.16732923686504364;
+// float mean_y = -0.14998193085193634;
+// float mean_z = 2.568124294281006;
 
-float std_s1 = 75.8375015258789;
-float std_s2 = 72.86641693115234; 
-float std_s3 = 77.235107421875; 
-float std_s4 = 79.19815826416016; 
-float std_s5 = 76.76965332031255; 
-float std_s6 = 80.93759155273438; 
-float std_s7 = 74.02841949462899; 
-float std_s8 = 88.13593292236328;
-float std_x = 8.387557983398438;
-float std_y = 8.411337852478027;
-float std_z = 4.372629642486572;
+// float std_s1 = 75.8375015258789;
+// float std_s2 = 72.86641693115234; 
+// float std_s3 = 77.235107421875; 
+// float std_s4 = 79.19815826416016; 
+// float std_s5 = 76.76965332031255; 
+// float std_s6 = 80.93759155273438; 
+// float std_s7 = 74.02841949462899; 
+// float std_s8 = 88.13593292236328;
+// float std_x = 8.387557983398438;
+// float std_y = 8.411337852478027;
+// float std_z = 4.372629642486572;
 
 // Trimmed Dataset Statistics
-// float mean_s1 = 440.56646728515625;
-// float mean_s2 = 369.13848876953125;
-// float mean_s3 = 411.2698059082031;
-// float mean_s4 = 370.88800048828125;
-// float mean_s5 = 349.4165954589844;
-// float mean_s6 = 398.39044189453125;
-// float mean_s7 = 339.6324768066406;
-// float mean_s8 = 392.6517639160156;
-// float mean_x = 0.2750225365161896;
-// float mean_y = 0.10459873825311661;
-// float mean_z = 4.4806132316589355;
+float mean_s1 = 440.56646728515625;
+float mean_s2 = 369.13848876953125;
+float mean_s3 = 411.2698059082031;
+float mean_s4 = 370.88800048828125;
+float mean_s5 = 349.4165954589844;
+float mean_s6 = 398.39044189453125;
+float mean_s7 = 339.6324768066406;
+float mean_s8 = 392.6517639160156;
+float mean_x = 0.2750225365161896;
+float mean_y = 0.10459873825311661;
+float mean_z = 4.4806132316589355;
 
-// float std_s1 = 69.91178894042969;
-// float std_s2 = 66.89142608642578; 
-// float std_s3 = 72.11554718017578; 
-// float std_s4 = 72.93818664550781; 
-// float std_s5 = 71.96635437011719; 
-// float std_s6 = 72.08090209960938; 
-// float std_s7 = 68.62278747558594; 
-// float std_s8 = 79.95512390136719;
-// float std_x = 8.54604721069336;
-// float std_y = 8.562744140625;
-// float std_z = 5.032437324523926;
+float std_s1 = 69.91178894042969;
+float std_s2 = 66.89142608642578; 
+float std_s3 = 72.11554718017578; 
+float std_s4 = 72.93818664550781; 
+float std_s5 = 71.96635437011719; 
+float std_s6 = 72.08090209960938; 
+float std_s7 = 68.62278747558594; 
+float std_s8 = 79.95512390136719;
+float std_x = 8.54604721069336;
+float std_y = 8.562744140625;
+float std_z = 5.032437324523926;
 
 // ------------------------------------------------------------------
 // define variables for coils, PWM1 - Coil1 etc.
