@@ -5,3 +5,43 @@ Model ID: 86
 # RMSE: 0.18807369 mm
 # R²: 0.99948776 
 # Average Runtime: 692.00108421 us
+
+Model type: non_quant_impl
+Model ID: 86
+# MAE: 0.02811468 mm
+# MSE: 0.03537171 mm²
+# RMSE: 0.18807369 mm
+# R²: 0.99948776 
+# Average Runtime: 1041.58691724 us
+
+Model type: non_quant_impl (Executed with model 141 test coordinates)
+Model ID: 86
+# MAE: 0.02869252 mm
+# MSE: 0.01255359 mm²
+# RMSE: 0.11204281 mm
+# R²: 0.99981821 
+# Average Runtime: 1129.67989179 us
+
+Model type: non_quant_impl (Executed with model 03 test coordinates)
+Model ID: 86
+# MAE: 0.02590531 mm
+# MSE: 0.01507748 mm²
+# RMSE: 0.12279041 mm
+# R²: 0.99978039 
+# Average Runtime: 1041.45861944 us
+
+Model type: non_quant_impl (Executed with model 03 test coordinates)
+Model ID: 86
+# MAE: 0.02865344 mm
+# MSE: 0.03660995 mm²
+# RMSE: 0.19133726 mm
+# R²: 0.99950182 
+# Average Runtime: 1126.32642020 us
+
+Model type: non_quant_impl (With dummy PID)
+Model ID: 86
+# MAE: 0.02811468 mm
+# MSE: 0.03537171 mm²
+# RMSE: 0.18807369 mm
+# R²: 0.99948776 
+# Average Runtime: 1043.19082038 us
