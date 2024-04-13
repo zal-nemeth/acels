@@ -1,0 +1,42 @@
+Model ID: 279
+
+Model: "sequential_15"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_75 (Dense)            (None, 60)                540       
+                                                                 
+ dense_76 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_77 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_78 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_79 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_75, Activation: selu
+Layer: dense_76, Activation: selu
+Layer: dense_77, Activation: selu
+Layer: dense_78, Activation: selu
+Layer: dense_79, Activation: linear
+
+Optimizer: Nadam
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 911
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.20979635 mm
+# MSE: 0.09725560 mm²
+# RMSE: 0.31185830 mm
+# R²: 0.99827293 

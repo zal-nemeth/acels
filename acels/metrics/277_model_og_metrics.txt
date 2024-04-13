@@ -1,0 +1,42 @@
+Model ID: 277
+
+Model: "sequential_13"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_65 (Dense)            (None, 60)                540       
+                                                                 
+ dense_66 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_67 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_68 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_69 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_65, Activation: hard_sigmoid
+Layer: dense_66, Activation: hard_sigmoid
+Layer: dense_67, Activation: hard_sigmoid
+Layer: dense_68, Activation: hard_sigmoid
+Layer: dense_69, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 1491
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.21549083 mm
+# MSE: 0.15825632 mm²
+# RMSE: 0.39781442 mm
+# R²: 0.99719709 

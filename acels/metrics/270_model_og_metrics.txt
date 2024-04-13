@@ -1,0 +1,42 @@
+Model ID: 270
+
+Model: "sequential_6"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_30 (Dense)            (None, 60)                540       
+                                                                 
+ dense_31 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_32 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_33 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_34 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_30, Activation: hard_sigmoid
+Layer: dense_31, Activation: hard_sigmoid
+Layer: dense_32, Activation: hard_sigmoid
+Layer: dense_33, Activation: hard_sigmoid
+Layer: dense_34, Activation: linear
+
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 2140
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.16554921 mm
+# MSE: 0.11883259 mm²
+# RMSE: 0.34472104 mm
+# R²: 0.99805241 

@@ -1,20 +1,20 @@
 Model ID: 157
 
-Model: "sequential_54"
+Model: "sequential_5"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- dense_324 (Dense)           (None, 60)                540       
+ dense_30 (Dense)            (None, 60)                540       
                                                                  
- dense_325 (Dense)           (None, 80)                4880      
+ dense_31 (Dense)            (None, 80)                4880      
                                                                  
- dense_326 (Dense)           (None, 80)                6480      
+ dense_32 (Dense)            (None, 80)                6480      
                                                                  
- dense_327 (Dense)           (None, 60)                4860      
+ dense_33 (Dense)            (None, 60)                4860      
                                                                  
- dense_328 (Dense)           (None, 30)                1830      
+ dense_34 (Dense)            (None, 30)                1830      
                                                                  
- dense_329 (Dense)           (None, 3)                 93        
+ dense_35 (Dense)            (None, 3)                 93        
                                                                  
 =================================================================
 Total params: 18683 (72.98 KB)
@@ -22,24 +22,24 @@ Trainable params: 18683 (72.98 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 
-Layer: dense_324, Activation: relu
-Layer: dense_325, Activation: relu
-Layer: dense_326, Activation: relu
-Layer: dense_327, Activation: relu
-Layer: dense_328, Activation: relu
-Layer: dense_329, Activation: linear
+Layer: dense_30, Activation: swish
+Layer: dense_31, Activation: swish
+Layer: dense_32, Activation: swish
+Layer: dense_33, Activation: swish
+Layer: dense_34, Activation: swish
+Layer: dense_35, Activation: linear
 
-Optimizer: Adamax
-Loss: <function mean_squared_error at 0x17f338ca0>
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x29c800ca0>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
-Epochs: 1526
+Epochs: 2590
 Batch Size: 32
-Patience: 150
+Patience: 500
 
 Model type: og
-# MAE: 0.08111812 mm
-# MSE: 0.08781240 mm²
-# RMSE: 0.29633157 mm
-# R²: 0.99873482 
+# MAE: 0.08330169 mm
+# MSE: 0.02078035 mm²
+# RMSE: 0.14415390 mm
+# R²: 0.99966819 

@@ -1,20 +1,20 @@
 Model ID: 168
 
-Model: "sequential_65"
+Model: "sequential_16"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- dense_390 (Dense)           (None, 60)                540       
+ dense_96 (Dense)            (None, 60)                540       
                                                                  
- dense_391 (Dense)           (None, 80)                4880      
+ dense_97 (Dense)            (None, 80)                4880      
                                                                  
- dense_392 (Dense)           (None, 80)                6480      
+ dense_98 (Dense)            (None, 80)                6480      
                                                                  
- dense_393 (Dense)           (None, 60)                4860      
+ dense_99 (Dense)            (None, 60)                4860      
                                                                  
- dense_394 (Dense)           (None, 30)                1830      
+ dense_100 (Dense)           (None, 30)                1830      
                                                                  
- dense_395 (Dense)           (None, 3)                 93        
+ dense_101 (Dense)           (None, 3)                 93        
                                                                  
 =================================================================
 Total params: 18683 (72.98 KB)
@@ -22,24 +22,24 @@ Trainable params: 18683 (72.98 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 
-Layer: dense_390, Activation: tanh
-Layer: dense_391, Activation: tanh
-Layer: dense_392, Activation: tanh
-Layer: dense_393, Activation: tanh
-Layer: dense_394, Activation: tanh
-Layer: dense_395, Activation: linear
+Layer: dense_96, Activation: tanh
+Layer: dense_97, Activation: tanh
+Layer: dense_98, Activation: tanh
+Layer: dense_99, Activation: tanh
+Layer: dense_100, Activation: tanh
+Layer: dense_101, Activation: linear
 
-Optimizer: SGD
-Loss: <function mean_squared_error at 0x17f338ca0>
+Optimizer: Nadam
+Loss: <function mean_squared_error at 0x29c800ca0>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
-Epochs: 3000
+Epochs: 2159
 Batch Size: 32
-Patience: 150
+Patience: 500
 
 Model type: og
-# MAE: 0.23540201 mm
-# MSE: 0.19458691 mm²
-# RMSE: 0.44112006 mm
-# R²: 0.99666753 
+# MAE: 0.06177178 mm
+# MSE: 0.02376216 mm²
+# RMSE: 0.15414979 mm
+# R²: 0.99964564 

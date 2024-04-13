@@ -1,0 +1,48 @@
+Model ID: 200
+
+Model: "sequential_6"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_42 (Dense)            (None, 60)                540       
+                                                                 
+ dense_43 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_44 (Dense)            (None, 80)                6480      
+                                                                 
+ dense_45 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_46 (Dense)            (None, 60)                3660      
+                                                                 
+ dense_47 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_48 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 22343 (87.28 KB)
+Trainable params: 22343 (87.28 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_42, Activation: hard_sigmoid
+Layer: dense_43, Activation: hard_sigmoid
+Layer: dense_44, Activation: hard_sigmoid
+Layer: dense_45, Activation: hard_sigmoid
+Layer: dense_46, Activation: hard_sigmoid
+Layer: dense_47, Activation: hard_sigmoid
+Layer: dense_48, Activation: linear
+
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x16ff38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 667
+Batch Size: 32
+Patience: 50
+
+Model type: og
+# MAE: 0.47747610 mm
+# MSE: 0.68715446 mm²
+# RMSE: 0.82894781 mm
+# R²: 0.98796026 

@@ -1,0 +1,45 @@
+Model ID: 179
+
+Model: "sequential_27"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_162 (Dense)           (None, 60)                540       
+                                                                 
+ dense_163 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_164 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_165 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_166 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_167 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_162, Activation: hard_sigmoid
+Layer: dense_163, Activation: hard_sigmoid
+Layer: dense_164, Activation: hard_sigmoid
+Layer: dense_165, Activation: hard_sigmoid
+Layer: dense_166, Activation: hard_sigmoid
+Layer: dense_167, Activation: linear
+
+Optimizer: Adamax
+Loss: <function mean_squared_error at 0x29c800ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 3000
+Batch Size: 32
+Patience: 500
+
+Model type: og
+# MAE: 0.22881989 mm
+# MSE: 0.19577805 mm²
+# RMSE: 0.44246814 mm
+# R²: 0.99637796 

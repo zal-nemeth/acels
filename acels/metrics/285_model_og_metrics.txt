@@ -1,0 +1,42 @@
+Model ID: 285
+
+Model: "sequential_21"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_105 (Dense)           (None, 60)                540       
+                                                                 
+ dense_106 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_107 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_108 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_109 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_105, Activation: relu
+Layer: dense_106, Activation: relu
+Layer: dense_107, Activation: relu
+Layer: dense_108, Activation: relu
+Layer: dense_109, Activation: linear
+
+Optimizer: Adamax
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 1416
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.11448567 mm
+# MSE: 0.08022299 mm²
+# RMSE: 0.28323662 mm
+# R²: 0.99876848 

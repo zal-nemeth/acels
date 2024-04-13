@@ -1,0 +1,42 @@
+Model ID: 296
+
+Model: "sequential_32"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_160 (Dense)           (None, 60)                540       
+                                                                 
+ dense_161 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_162 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_163 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_164 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_160, Activation: softmax
+Layer: dense_161, Activation: softmax
+Layer: dense_162, Activation: softmax
+Layer: dense_163, Activation: softmax
+Layer: dense_164, Activation: linear
+
+Optimizer: SGD
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 266
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 6.19098241 mm
+# MSE: 57.88116467 mm²
+# RMSE: 7.60796718 mm
+# R²: -0.00322284 

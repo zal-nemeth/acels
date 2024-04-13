@@ -1,0 +1,42 @@
+Model ID: 272
+
+Model: "sequential_8"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_40 (Dense)            (None, 60)                540       
+                                                                 
+ dense_41 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_42 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_43 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_44 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_40, Activation: selu
+Layer: dense_41, Activation: selu
+Layer: dense_42, Activation: selu
+Layer: dense_43, Activation: selu
+Layer: dense_44, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 1037
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.20379946 mm
+# MSE: 0.10967455 mm²
+# RMSE: 0.33117148 mm
+# R²: 0.99811842 
