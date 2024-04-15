@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras import Sequential
-from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.callbacks import EarlyStopping, ModelCheckpoint, Callback
 from keras.layers import Dense
 from keras.models import load_model
 
@@ -139,6 +139,17 @@ def data_processing(input_data):
     return data32, train_stats
 
 
+class PredictionCallback(Callback):
+    def __init__(self, feature_data, target_data, filepath):
+        self.feature_data = feature_data
+        self.target_data = target_data
+        self.filepath = filepath
+
+    def on_epoch_end(self, epoch, logs=None):
+        predictions = self.model.predict(self.feature_data)
+        # Save predictions to a file, appending the epoch number to the filename
+        np.save(f'{self.filepath}_epoch_{epoch+1}.npy', predictions)
+
 # -----------------------------------------------------------------------------
 # Model definition and training
 # -----------------------------------------------------------------------------
@@ -256,6 +267,8 @@ def train_model(
         mode="min",
         verbose=1,
     )
+    
+    predictions_saver = PredictionCallback(feature_validate, target_validate, 'model_predictions')
 
     # -----------------------------------------------------------------------------
     # Model Building
@@ -281,7 +294,7 @@ def train_model(
         epochs=epochs,
         batch_size=batch_size,
         validation_data=(feature_validate, target_validate),
-        callbacks=[early_stopping, model_checkpoint],
+        callbacks=[early_stopping, model_checkpoint, predictions_saver],
     )
     # Check Mean Absolute Error
     _, test_mae = model.evaluate(feature_test, target_test, verbose=0)
@@ -449,7 +462,6 @@ def train_model(
     model_rmse = eval_metrics_og["RMSE"][0]
     model_r2 = eval_metrics_og["R²"][0]
 
-    # Adjusting titles, legends, and positioning of the accuracy text to improve clarity and avoid overlay
     fig, axs = plt.subplots(
         1,
         2,
@@ -734,29 +746,29 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "150"
-    model_id_int = 150
+    model_id = "201"
+    model_id_int = 201
     epochs = 3000
     batch_size = 32
-    patiences = [50, 150]
+    patiences = [150]
     activations = [
-        "relu",
-        "selu",
+        # "relu",
+        # "selu",
         "tanh",
-        "sigmoid",
-        "softmax",
-        "swish",
-        "hard_sigmoid",
-        "gelu",
-        "elu",
+        # "sigmoid",
+        # "softmax",
+        # "swish",
+        # "hard_sigmoid",
+        # "gelu",
+        # "elu",
     ]
     optimizers = [
         # "RMSprop",
-        "adam",
-        "nadam",
+        # "adam",
+        # "nadam",
         "adamax",
         # "adagrad",
-        "sgd",
+        # "sgd",
     ]
     ###################################################
     ###################################################
@@ -859,7 +871,7 @@ if __name__ == "__main__":
                     )
                     model_mae = train_model(
                         model_id=model_id,
-                        training_data=training_data_trm,
+                        training_data=training_data_ext,
                         model_path=MODEL_TF,
                         activation=activation,
                         optimizer=optimizer,

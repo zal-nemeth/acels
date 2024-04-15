@@ -4,9 +4,6 @@ from scipy.interpolate import griddata
 from scipy.spatial import ConvexHull
 from sklearn.linear_model import LinearRegression
 
-# Assuming fx_pred, fy_pred, fz_pred, tx_pred, ty_pred are defined elsewhere
-# and perform similar operations as their MATLAB counterparts
-
 data = pd.read_csv("acels/data/r_z_data_1A.csv")
 
 points = data[["r", "z"]].values  # Input points (r, z)
@@ -118,7 +115,7 @@ def matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y):
 # ----------------------------------------------------------------------------
 # # Test algorithm
 # ----------------------------------------------------------------------------
-# if __init__ == "__main__":
+# if __name__ == "__main__":
 #     x, y, z = 9, 5, 10
 #     F_x, F_y, F_z = 0, 0, 0.9
 #     T_x, T_y = 0, 0

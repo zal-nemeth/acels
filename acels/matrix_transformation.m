@@ -10,6 +10,15 @@ function I = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y) %#codegen
     r = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,16,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20];
     z_sim = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
 
+    % Centroid and Sort Index (Common for Fx, Fy, Fz, Tx, Ty)
+    sortIndex = [8, 24, 40, 56, 72, 88, 104, 7, 23, 120, 39, 55, 6, 136, 71, 22, 87, 38, 5, 54, 103, 21, 70, 37, 4, 86, 119, 152, 53, 20, 3, 36, 69, 19, 102, 52, 2, 35, 85, 18, 68, 1, 135, 51, 34, 17, 118, 101, 84, 67, 50, 33, 49, 66, 83, 100, 117, 65, 134, 82, 99, 116, 81, 151, 98, 133, 115, 97, 114, 132, 150, 113, 131, 130, 149, 129, 148, 147, 146, 145, 164, 165, 162, 161, 166, 167, 163, 168, 177, 178, 179, 180, 193, 181, 194, 195, 209, 182, 196, 210, 225, 211, 197, 226, 241, 183, 212, 227, 242, 257, 198, 213, 228, 243, 258, 273, 289, 274, 259, 244, 229, 305, 214, 290, 275, 199, 260, 321, 306, 245, 291, 322, 276, 230, 307, 261, 292, 323, 246, 277, 215, 308, 184, 324, 293, 262, 309, 231, 278, 325, 294, 247, 310, 200, 263, 326, 279, 295, 216, 311, 327, 232, 248, 264, 280, 296, 312, 328, 329, 313, 297, 281, 265, 249, 233, 330, 314, 217, 298, 282, 201, 331, 266, 315, 250, 299, 332, 283, 234, 316, 267, 300, 333, 251, 218, 317, 185, 284, 334, 301, 268, 318, 235, 285, 335, 302, 252, 319, 269, 336, 202, 286, 303, 320, 219, 236, 253, 270, 287, 304, 288, 271, 254, 237, 220, 272, 203, 255, 238, 186, 221, 256, 239, 204, 222, 240, 223, 205, 224, 187, 206, 207, 188, 208, 189, 190, 191, 192, 169, 176, 174, 173, 175, 172, 171, 170, 160, 159, 158, 157, 144, 156, 143, 142, 155, 128, 141, 127, 112, 126, 140, 111, 125, 96, 154, 110, 95, 139, 80, 124, 109, 94, 79, 64, 48, 63, 78, 93, 108, 32, 123, 47, 62, 138, 16, 77, 31, 92, 46, 15, 61, 107, 30, 76, 45, 14, 60, 91, 153, 122, 29, 13, 44, 75, 28, 106, 59, 12, 43, 90, 27, 11, 137, 74, 58, 42, 121, 26, 10, 105, 89, 73, 57, 41, 25, 9];
+
+    beta_Fx = [0.20663412, 0.02133417, -0.02205035];
+    beta_Fy = [-3.32094431e-12, -2.99258685e-13, 5.23355742e-13];
+    beta_Fz = [1.19079393, -0.02386006, -0.04565791];
+    beta_Tx = [-1.87635889e-11, -5.47282386e-12, 1.91861842e-11];
+    beta_Ty = [4.33998584, 0.15687256, -0.38981232];
+
     % Extract points and values
     points = [r', z_sim'];
     values_fx = Fx';
@@ -34,11 +43,11 @@ function I = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y) %#codegen
         r = sqrt((x - cx)^2 + (y - cy)^2);
         theta_i = atan2(y - cy, x - cx);
         
-        f_x = custom_extrapolate(r, z, values_fx, points);
-        f_y = custom_extrapolate(r, z, values_fy, points);
-        f_z = custom_extrapolate(r, z, values_fz, points);
-        t_x = custom_extrapolate(r, z, values_tx, points);
-        t_y = custom_extrapolate(r, z, values_ty, points);
+       f_x = custom_extrapolate(r, z, values_fx, points, sortIndex, beta_Fx);
+        f_y = custom_extrapolate(r, z, values_fy, points, sortIndex, beta_Fy);
+        f_z = custom_extrapolate(r, z, values_fz, points, sortIndex, beta_Fz);
+        t_x = custom_extrapolate(r, z, values_tx, points, sortIndex, beta_Tx);
+        t_y = custom_extrapolate(r, z, values_ty, points, sortIndex, beta_Ty);
         
         A(:, i) = [cos(theta_i) * f_x; sin(theta_i) * f_y; f_z; 
                    -sin(theta_i) * t_x; cos(theta_i) * t_y];
@@ -49,20 +58,8 @@ function I = matrix_transform(x, y, z, F_x, F_y, F_z, T_x, T_y) %#codegen
 end
 
 %%
-function interpolated_value = custom_extrapolate(r, z, values, points) %#codegen
-    % Manual implementation of a check for point inside convex hull
-    % and a simple nearest neighbor interpolation/extrapolation without convhull
-
-    % Find the centroid of the points
-    centroid = mean(points, 1);
-    % centroid = [7.5, 10.0];
-    
-    % Sort points by angle from centroid for a pseudo-convex hull
-    angles = atan2(points(:,2) - centroid(2), points(:,1) - centroid(1));
-    [~, sortIdx] = sort(angles);
+function interpolated_value = custom_extrapolate(r, z, values, points, sortIdx, beta) %#codegen
     sortedPoints = points(sortIdx, :);
-    
-    % Check if point is inside the pseudo-convex hull
     inside = inpolygon(r, z, sortedPoints(:,1), sortedPoints(:,2));
     
     if inside
@@ -72,9 +69,7 @@ function interpolated_value = custom_extrapolate(r, z, values, points) %#codegen
         interpolated_value = values(sortIdx(nearestIndex));
     else
         % Linear regression extrapolation for a point outside
-        X = [ones(size(points, 1), 1), points]; % Add intercept term for regression
-        beta = (X' * X) \ (X' * values); % Compute regression coefficients
-        interpolated_value = [1, r, z] * beta; % Predict value for the point
+        interpolated_value = [1, r, z] * beta'; % Using precomputed beta coefficients
     end
     
     % Ensure the interpolated or extrapolated value is not negative
