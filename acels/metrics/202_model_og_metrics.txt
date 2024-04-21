@@ -1,0 +1,45 @@
+Model ID: 202
+
+Model: "sequential_1"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_6 (Dense)             (None, 60)                540       
+                                                                 
+ dense_7 (Dense)             (None, 80)                4880      
+                                                                 
+ dense_8 (Dense)             (None, 80)                6480      
+                                                                 
+ dense_9 (Dense)             (None, 60)                4860      
+                                                                 
+ dense_10 (Dense)            (None, 30)                1830      
+                                                                 
+ dense_11 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18,683
+Trainable params: 18,683
+Non-trainable params: 0
+_________________________________________________________________
+
+Layer: dense_6, Activation: tanh
+Layer: dense_7, Activation: tanh
+Layer: dense_8, Activation: tanh
+Layer: dense_9, Activation: tanh
+Layer: dense_10, Activation: tanh
+Layer: dense_11, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x000001E7C6FCBE50>
+Metrics: ['loss', 'mae']
+
+Dataset: extended
+Epochs: 483
+Batch Size: 32
+Patience: 200
+
+Model type: og
+# MAE: 0.04123324 mm
+# MSE: 0.04377117 mm²
+# RMSE: 0.20921561 mm
+# R²: 0.99937514 

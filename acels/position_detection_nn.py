@@ -148,7 +148,7 @@ class PredictionCallback(Callback):
     def on_epoch_end(self, epoch, logs=None):
         predictions = self.model.predict(self.feature_data)
         # Save predictions to a file, appending the epoch number to the filename
-        np.save(f'{self.filepath}_epoch_{epoch+1}.npy', predictions)
+        np.save(f'model_predictions/{self.filepath}_epoch_{epoch+1}.npy', predictions)
 
 # -----------------------------------------------------------------------------
 # Model definition and training
@@ -746,16 +746,16 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "201"
-    model_id_int = 201
+    model_id = "205"
+    model_id_int = 205
     epochs = 3000
     batch_size = 32
-    patiences = [150]
+    patiences = [200]
     activations = [
         # "relu",
         # "selu",
-        "tanh",
-        # "sigmoid",
+        # "tanh",
+        "sigmoid",
         # "softmax",
         # "swish",
         # "hard_sigmoid",
@@ -764,9 +764,9 @@ if __name__ == "__main__":
     ]
     optimizers = [
         # "RMSprop",
-        # "adam",
+        "adam",
         # "nadam",
-        "adamax",
+        # "adamax",
         # "adagrad",
         # "sgd",
     ]
@@ -871,7 +871,7 @@ if __name__ == "__main__":
                     )
                     model_mae = train_model(
                         model_id=model_id,
-                        training_data=training_data_ext,
+                        training_data=training_data_trm,
                         model_path=MODEL_TF,
                         activation=activation,
                         optimizer=optimizer,
@@ -879,14 +879,14 @@ if __name__ == "__main__":
                         epochs=epochs,
                         batch_size=batch_size,
                     )
-                    if model_mae <= 0.07:
-                        convert_model(
-                            model_id,
-                            MODEL_TF,
-                            MODEL_TFLITE,
-                            MODEL_TFLITE_MICRO,
-                            MODEL_NO_QUANT_TFLITE,
-                            MODEL_NO_QUANT_TFLITE_MICRO,
-                        )
+                    # if model_mae <= 0.07:
+                    #     convert_model(
+                    #         model_id,
+                    #         MODEL_TF,
+                    #         MODEL_TFLITE,
+                    #         MODEL_TFLITE_MICRO,
+                    #         MODEL_NO_QUANT_TFLITE,
+                    #         MODEL_NO_QUANT_TFLITE_MICRO,
+                    #     )
 
                     model_id_int += 1

@@ -1,0 +1,45 @@
+Model ID: 204
+
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense (Dense)               (None, 60)                540       
+                                                                 
+ dense_1 (Dense)             (None, 80)                4880      
+                                                                 
+ dense_2 (Dense)             (None, 80)                6480      
+                                                                 
+ dense_3 (Dense)             (None, 60)                4860      
+                                                                 
+ dense_4 (Dense)             (None, 30)                1830      
+                                                                 
+ dense_5 (Dense)             (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18,683
+Trainable params: 18,683
+Non-trainable params: 0
+_________________________________________________________________
+
+Layer: dense, Activation: sigmoid
+Layer: dense_1, Activation: sigmoid
+Layer: dense_2, Activation: sigmoid
+Layer: dense_3, Activation: sigmoid
+Layer: dense_4, Activation: sigmoid
+Layer: dense_5, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x00000246E0F3AE50>
+Metrics: ['loss', 'mae']
+
+Dataset: extended
+Epochs: 1859
+Batch Size: 32
+Patience: 200
+
+Model type: og
+# MAE: 0.03579461 mm
+# MSE: 0.03059259 mm²
+# RMSE: 0.17490737 mm
+# R²: 0.99956109 

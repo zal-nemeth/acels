@@ -28,3 +28,6 @@ container
 
 # Test garbage
 tests/dummy_model/*
+
+# Saved models/epochs
+model_predictions/

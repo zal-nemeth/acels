@@ -80,7 +80,8 @@ def load_and_prepare_data(csv_path, quantized=False):
         0, inplace=True
     )  # Assuming missing values can be treated as 0s. Adjust if needed.
     results = {}
-    for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]:
+    # for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]:
+    for optimizer in ["Adam", "Nadam"]:
         if quantized:
             key = f"Quant {optimizer}"
         else:
@@ -101,17 +102,17 @@ def extract_data_for_plot(metric_type):
     """
     if metric_type == "MAE":
         non_quant_data = load_and_prepare_data(
-            "acels/analysis/extended_50_mae_non_quant_models.csv"
+            "acels/analysis/trimmed_150_mae_non_quant_models.csv"
         )
         quant_data = load_and_prepare_data(
-            "acels/analysis/extended_50_mae_quant_models.csv", quantized=True
+            "acels/analysis/trimmed_150_mae_quant_models.csv", quantized=True
         )
     elif metric_type == "Runtime":
         non_quant_data = load_and_prepare_data(
-            "acels/analysis/extended_50_runtime_non_quant_models.csv"
+            "acels/analysis/trimmed_150_runtime_non_quant_models.csv"
         )
         quant_data = load_and_prepare_data(
-            "acels/analysis/extended_50_runtime_quant_models.csv", quantized=True
+            "acels/analysis/trimmed_150_runtime_quant_models.csv", quantized=True
         )
     else:
         raise ValueError("Invalid metric_type. Choose either 'MAE' or 'Runtime'.")
@@ -119,11 +120,13 @@ def extract_data_for_plot(metric_type):
     # Convert dictionary values to numpy arrays
     data_non_quant = [
         np.array(non_quant_data[f"Non-Quant {optimizer}"])
-        for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]
+        # for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]
+        for optimizer in ["Adam", "Nadam"]
     ]
     data_quant = [
         np.array(quant_data[f"Quant {optimizer}"])
-        for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]
+        # for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]
+        for optimizer in ["Adam", "Nadam",]
     ]
 
     return data_non_quant, data_quant
@@ -141,7 +144,8 @@ def plot_data(metric_type):
     bar_width = 0.15
 
     # Plot configuration
-    for i, optimizer in enumerate(["Adam", "Adamax", "Nadam", "RMSprop"]):
+    # for i, optimizer in enumerate(["Adam", "Adamax", "Nadam", "RMSprop"]):
+    for i, optimizer in enumerate(["Adam", "Nadam"]):
         axs.bar(
             index + i * bar_width,
             data_non_quant[i],
@@ -256,19 +260,22 @@ def plot_combined_v0(metric_types):
 
 def plot_combined(metric_types):
     fig, axs = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
-    categories = ["relu", "sigmoid", "swish", "tanh"]
+    categories = ["sigmoid", "swish", "tanh"]
     n_categories = len(categories)
     index = np.arange(n_categories)
     bar_width = 0.2
 
     # Predefined colors for each bar type
-    colors = {'Non-Quant Adam': '#8fbbda', 'Quant Adam': '#ffbf86', 'Non-Quant Adamax': '#96d096', 'Quant Adamax': '#ea9394', 'Non-Quant Nadam': '#cab3de', 'Quant Nadam': '#c6aaa5', 'Non-Quant RMSprop': '#f1bbe0', 'Quant RMSprop': '#bfbfbf'}
-    colors = {'Non-Quant Adam': '#79add2', 'Quant Adam': '#ffb26e', 'Non-Quant Adamax': '#80c680', 'Quant Adamax': '#e67d7e', 'Non-Quant Nadam': '#bfa4d7', 'Quant Nadam': '#ba9a93', 'Non-Quant RMSprop': '#eeadda', 'Quant RMSprop': '#b2b2b2'}
+    # colors = {'Non-Quant Adam': '#8fbbda', 'Quant Adam': '#ffbf86', 'Non-Quant Adamax': '#96d096', 'Quant Adamax': '#ea9394', 'Non-Quant Nadam': '#cab3de', 'Quant Nadam': '#c6aaa5', 'Non-Quant RMSprop': '#f1bbe0', 'Quant RMSprop': '#bfbfbf'}
+    # colors = {'Non-Quant Adam': '#79add2', 'Quant Adam': '#ffb26e', 'Non-Quant Adamax': '#80c680', 'Quant Adamax': '#e67d7e', 'Non-Quant Nadam': '#bfa4d7', 'Quant Nadam': '#ba9a93', 'Non-Quant RMSprop': '#eeadda', 'Quant RMSprop': '#b2b2b2'}
+    colors = {'Non-Quant Adam': '#8fbbda', 'Quant Adam': '#ffbf86', 'Non-Quant Nadam': '#cab3de', 'Quant Nadam': '#c6aaa5'}
+    colors = {'Non-Quant Adam': '#79add2', 'Quant Adam': '#ffb26e', 'Non-Quant Nadam': '#bfa4d7', 'Quant Nadam': '#ba9a93'}
     for metric_index, metric_type in enumerate(metric_types):
         data_non_quant, data_quant = extract_data_for_plot(metric_type)
         plotted_labels = set()
 
-        for i, optimizer in enumerate(["Adam", "Adamax", "Nadam", "RMSprop"]):
+        # for i, optimizer in enumerate(["Adam", "Adamax", "Nadam", "RMSprop"]):
+        for i, optimizer in enumerate(["Adam", "Nadam"]):
             for j, category in enumerate(categories):
                 non_quant_value = data_non_quant[i][j]
                 quant_value = data_quant[i][j]
@@ -337,39 +344,39 @@ def plot_combined(metric_types):
     return colors
 
 # Plot both MAE and Runtime on the same figure
-# colours_used = plot_combined(["MAE", "Runtime"])
-# print(colours_used)
+colours_used = plot_combined(["MAE", "Runtime"])
+print(colours_used)
 
 
-import pandas as pd
-from tabulate import tabulate
+# import pandas as pd
+# from tabulate import tabulate
 
-def load_and_display_data(file_path):
-    # Load data from a CSV file into a DataFrame
-    data = pd.read_csv(file_path, index_col='Activation')
-    # Display the DataFrame using tabulate for a table-like format
-    print(tabulate(data, headers='keys', tablefmt='psql'))
-    print("\n")  # Add a newline for better separation of tables
+# def load_and_display_data(file_path):
+#     # Load data from a CSV file into a DataFrame
+#     data = pd.read_csv(file_path, index_col='Activation')
+#     # Display the DataFrame using tabulate for a table-like format
+#     print(tabulate(data, headers='keys', tablefmt='psql'))
+#     print("\n")  # Add a newline for better separation of tables
 
-# Paths to the CSV files
-files = [
-    'acels/analysis/extended_50_mae_non_quant_models.csv',
-    'acels/analysis/extended_50_mae_quant_models.csv',
-    'acels/analysis/extended_50_runtime_non_quant_models.csv',
-    'acels/analysis/extended_50_runtime_quant_models.csv',
-    'acels/analysis/extended_150_mae_non_quant_models.csv',
-    'acels/analysis/extended_150_mae_quant_models.csv',
-    'acels/analysis/extended_150_runtime_non_quant_models.csv',
-    'acels/analysis/extended_150_runtime_quant_models.csv',
-    'acels/analysis/trimmed_50_mae_non_quant_models.csv',
-    'acels/analysis/trimmed_50_mae_quant_models.csv',
-    'acels/analysis/trimmed_50_runtime_non_quant_models.csv',
-    'acels/analysis/trimmed_50_runtime_quant_models.csv',
-    'acels/analysis/trimmed_150_mae_non_quant_models.csv',
-    'acels/analysis/trimmed_150_mae_quant_models.csv',
-    'acels/analysis/trimmed_150_runtime_non_quant_models.csv',
-    'acels/analysis/trimmed_150_runtime_quant_models.csv'
-]
+# # Paths to the CSV files
+# files = [
+#     'acels/analysis/extended_50_mae_non_quant_models.csv',
+#     'acels/analysis/extended_50_mae_quant_models.csv',
+#     'acels/analysis/extended_50_runtime_non_quant_models.csv',
+#     'acels/analysis/extended_50_runtime_quant_models.csv',
+#     'acels/analysis/extended_150_mae_non_quant_models.csv',
+#     'acels/analysis/extended_150_mae_quant_models.csv',
+#     'acels/analysis/extended_150_runtime_non_quant_models.csv',
+#     'acels/analysis/extended_150_runtime_quant_models.csv',
+#     'acels/analysis/trimmed_50_mae_non_quant_models.csv',
+#     'acels/analysis/trimmed_50_mae_quant_models.csv',
+#     'acels/analysis/trimmed_50_runtime_non_quant_models.csv',
+#     'acels/analysis/trimmed_50_runtime_quant_models.csv',
+#     'acels/analysis/trimmed_150_mae_non_quant_models.csv',
+#     'acels/analysis/trimmed_150_mae_quant_models.csv',
+#     'acels/analysis/trimmed_150_runtime_non_quant_models.csv',
+#     'acels/analysis/trimmed_150_runtime_quant_models.csv'
+# ]
 
 
 # def save_data_as_svg(dataframe, filename):
@@ -416,63 +423,63 @@ files = [
 # for file in files:
 #     process_and_save(file)
 
-import pandas as pd
-import matplotlib.pyplot as plt
+# import pandas as pd
+# import matplotlib.pyplot as plt
 
-def add_units(dataframe, data_type):
-    # Define unit based on the data type
-    unit = "mm" if "mae" in data_type.lower() else "us"
-    # Convert data to string and append unit
-    for col in dataframe.columns:
-        dataframe[col] = dataframe[col].apply(lambda x: f"{x:.6f} {unit}" if pd.notna(x) else "")
-    return dataframe
+# def add_units(dataframe, data_type):
+#     # Define unit based on the data type
+#     unit = "mm" if "mae" in data_type.lower() else "us"
+#     # Convert data to string and append unit
+#     for col in dataframe.columns:
+#         dataframe[col] = dataframe[col].apply(lambda x: f"{x:.6f} {unit}" if pd.notna(x) else "")
+#     return dataframe
 
-def save_data_as_svg(dataframe, filename):
-    # Create a plot object with dataframe data
-    fig, ax = plt.subplots()
-    # Remove the x and y axis
-    ax.axis('off')
-    ax.axis('tight')
-    # Prepare data and headers for the table
-    cell_text = dataframe.values
-    col_labels = ['Activation'] + dataframe.columns.tolist()
-    row_labels = dataframe.index.tolist()
+# def save_data_as_svg(dataframe, filename):
+#     # Create a plot object with dataframe data
+#     fig, ax = plt.subplots()
+#     # Remove the x and y axis
+#     ax.axis('off')
+#     ax.axis('tight')
+#     # Prepare data and headers for the table
+#     cell_text = dataframe.values
+#     col_labels = ['Activation'] + dataframe.columns.tolist()
+#     row_labels = dataframe.index.tolist()
     
-    # Create an array including the row labels as the first column of cell_text
-    full_cell_text = [[row_label] + list(row) for row_label, row in zip(row_labels, cell_text)]
+#     # Create an array including the row labels as the first column of cell_text
+#     full_cell_text = [[row_label] + list(row) for row_label, row in zip(row_labels, cell_text)]
     
-    # Table added to plot with adjusted row labels and headers
-    table = ax.table(
-        cellText=full_cell_text,
-        colLabels=col_labels,
-        loc='center',
-        cellLoc='center'
-    )
+#     # Table added to plot with adjusted row labels and headers
+#     table = ax.table(
+#         cellText=full_cell_text,
+#         colLabels=col_labels,
+#         loc='center',
+#         cellLoc='center'
+#     )
     
-    # Adjust layout to make room for table
-    fig.tight_layout()
-    # Save the table as an SVG file
-    plt.savefig(f"{filename}.svg", format='svg')
+#     # Adjust layout to make room for table
+#     fig.tight_layout()
+#     # Save the table as an SVG file
+#     plt.savefig(f"{filename}.svg", format='svg')
 
-def save_data_as_excel(dataframe, filename):
-    # Save the dataframe to an Excel file
-    dataframe.to_excel(f"{filename}.xlsx")
+# def save_data_as_excel(dataframe, filename):
+#     # Save the dataframe to an Excel file
+#     dataframe.to_excel(f"{filename}.xlsx")
 
-def process_and_save(file_path):
-    # Load data from CSV
-    data = pd.read_csv(file_path, index_col='Activation')
-    # Determine if the data is for MAE or runtime based on the filename
-    data_type = "mae" if "mae" in file_path.lower() else "runtime"
-    # Add units to the dataframe
-    data_with_units = add_units(data, data_type)
-    # Save as SVG and Excel
-    base_filename = file_path.split('.')[0]  # Remove extension from file name
-    save_data_as_svg(data_with_units, base_filename)
-    save_data_as_excel(data_with_units, base_filename)
+# def process_and_save(file_path):
+#     # Load data from CSV
+#     data = pd.read_csv(file_path, index_col='Activation')
+#     # Determine if the data is for MAE or runtime based on the filename
+#     data_type = "mae" if "mae" in file_path.lower() else "runtime"
+#     # Add units to the dataframe
+#     data_with_units = add_units(data, data_type)
+#     # Save as SVG and Excel
+#     base_filename = file_path.split('.')[0]  # Remove extension from file name
+#     save_data_as_svg(data_with_units, base_filename)
+#     save_data_as_excel(data_with_units, base_filename)
 
-# Process each file
-for file in files:
-    process_and_save(file)
+# # Process each file
+# for file in files:
+#     process_and_save(file)
 
 
 # Display each table
