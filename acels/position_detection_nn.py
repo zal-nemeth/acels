@@ -275,10 +275,10 @@ def train_model(
     # -----------------------------------------------------------------------------
     # Create model with 8 input, 3 output and 5 hidden layers
     model = Sequential()
-    model.add(Dense(60, activation=activation, input_shape=(8,)))
-    model.add(Dense(80, activation=activation))
+    model.add(Dense(30, activation=activation, input_shape=(8,)))
     model.add(Dense(80, activation=activation))
     model.add(Dense(60, activation=activation))
+    model.add(Dense(80, activation=activation))
     model.add(Dense(30, activation=activation))
     model.add(Dense(3))
     model.compile(optimizer=optimizer, loss="mse", metrics=["mae"])
@@ -369,24 +369,24 @@ def train_model(
     fig, axs = plt.subplots(2, 2, figsize=(15, 10))  # 2x2 plot
 
     # Plot Training and Validation Loss
-    axs[0, 0].plot(epochs, train_loss, "g.", label="Training loss")
-    axs[0, 0].plot(epochs, val_loss, "b", label="Validation loss")
+    axs[0, 0].plot(epochs, train_loss, "#1f77b4", label="Training loss")
+    axs[0, 0].plot(epochs, val_loss, "#ff7f0e", label="Validation loss")
     axs[0, 0].set_title("Training and Validation Loss")
     axs[0, 0].set_xlabel("Epochs")
     axs[0, 0].set_ylabel("Loss")
     axs[0, 0].legend()
 
     # Re-plot Training and Validation Loss, skipping first 50
-    axs[0, 1].plot(epochs[SKIP:], train_loss[SKIP:], "g.", label="Training loss")
-    axs[0, 1].plot(epochs[SKIP:], val_loss[SKIP:], "b.", label="Validation loss")
+    axs[0, 1].plot(epochs[SKIP:], train_loss[SKIP:], "#1f77b4", label="Training loss")
+    axs[0, 1].plot(epochs[SKIP:], val_loss[SKIP:], "#ff7f0e", label="Validation loss")
     axs[0, 1].set_title("Training and Validation Loss (Skip first 50)")
     axs[0, 1].set_xlabel("Epochs")
     axs[0, 1].set_ylabel("Loss")
     axs[0, 1].legend()
 
     # Plot Training and Validation MAE, skipping first 50
-    axs[1, 0].plot(epochs[SKIP:], train_mae[SKIP:], "g.", label="Training MAE")
-    axs[1, 0].plot(epochs[SKIP:], val_mae[SKIP:], "b.", label="Validation MAE")
+    axs[1, 0].plot(epochs[SKIP:], train_mae[SKIP:], "#1f77b4", label="Training MAE")
+    axs[1, 0].plot(epochs[SKIP:], val_mae[SKIP:], "#ff7f0e", label="Validation MAE")
     axs[1, 0].set_title("Training and Validation MAE (Skip first 50)")
     axs[1, 0].set_xlabel("Epochs")
     axs[1, 0].set_ylabel("MAE")
@@ -471,9 +471,9 @@ def train_model(
     )
 
     # Normalized model predictions plot
-    axs[0].scatter3D(norm_x, norm_y, norm_z, c="blue", s=15, label="Actual Values")
+    axs[0].scatter3D(norm_x, norm_y, norm_z, c="#1f77b4", s=15, label="Actual Values")
     axs[0].scatter3D(
-        norm_x2, norm_y2, norm_z2, c="red", s=6, alpha=0.5, label="Model Predictions"
+        norm_x2, norm_y2, norm_z2, c="#d62728", s=6, alpha=0.5, label="Model Predictions"
     )
     axs[0].set_title("Normalized Model Predictions")
     axs[0].set_xlabel("X")
@@ -482,8 +482,8 @@ def train_model(
     axs[0].legend()
 
     # Denormalized model predictions plot
-    axs[1].scatter3D(x, y, z, c="blue", s=16, label="Actual Values")
-    axs[1].scatter3D(x2, y2, z2, c="red", s=6, alpha=0.5, label="Model Predictions")
+    axs[1].scatter3D(x, y, z, c="#1f77b4", s=16, label="Actual Values")
+    axs[1].scatter3D(x2, y2, z2, c="#d62728", s=6, alpha=0.5, label="Model Predictions")
     axs[1].set_title("Denormalized Model Predictions")
     axs[1].set_xlabel("X (mm)")
     axs[1].set_ylabel("Y (mm)")
@@ -746,24 +746,24 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "205"
-    model_id_int = 205
+    model_id = "299"
+    model_id_int = 299
     epochs = 3000
-    batch_size = 32
-    patiences = [200]
+    batch_sizes = [32]#, 128, 200]
+    patiences = [150]
     activations = [
         # "relu",
         # "selu",
         # "tanh",
         "sigmoid",
-        # "softmax",
-        # "swish",
-        # "hard_sigmoid",
+        "softmax",
+        "swish",
+        "hard_sigmoid",
         # "gelu",
         # "elu",
     ]
     optimizers = [
-        # "RMSprop",
+        "RMSprop",
         "adam",
         # "nadam",
         # "adamax",
@@ -826,7 +826,7 @@ if __name__ == "__main__":
             optimizer="nadam",
             patience=100,
             epochs=epochs,
-            batch_size=batch_size,
+            batch_size=batch_sizes[0],
         )
 
     elif args.convert:
@@ -849,44 +849,45 @@ if __name__ == "__main__":
         )
 
     elif args.all:
-        for patience in patiences:
-            for optimizer in optimizers:
-                for activation in activations:
-                    model_id = f"{model_id_int:02d}"
-                    MODEL_TF = MODELS_DIR + "model"
-                    MODEL_NO_QUANT_TFLITE = (
-                        MODELS_DIR + f"{model_id}_model_no_quant.tflite"
-                    )
-                    MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
-                    MODEL_NO_QUANT_TFLITE_MICRO = (
-                        MODELS_DIR + f"{model_id}_model_no_quant.cc"
-                    )
-                    MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
-                    test_data = f"acels/data/{model_id}_test_coordinates.csv"
-                    quantized_output_path = (
-                        f"acels/predictions/{model_id}_quantized_predictions.csv"
-                    )
-                    non_quantized_output_path = (
-                        f"acels/predictions/{model_id}_non_quantized_predictions.csv"
-                    )
-                    model_mae = train_model(
-                        model_id=model_id,
-                        training_data=training_data_trm,
-                        model_path=MODEL_TF,
-                        activation=activation,
-                        optimizer=optimizer,
-                        patience=patience,
-                        epochs=epochs,
-                        batch_size=batch_size,
-                    )
-                    # if model_mae <= 0.07:
-                    #     convert_model(
-                    #         model_id,
-                    #         MODEL_TF,
-                    #         MODEL_TFLITE,
-                    #         MODEL_TFLITE_MICRO,
-                    #         MODEL_NO_QUANT_TFLITE,
-                    #         MODEL_NO_QUANT_TFLITE_MICRO,
-                    #     )
+        for batch_size in batch_sizes:
+            for patience in patiences:
+                for optimizer in optimizers:
+                    for activation in activations:
+                        model_id = f"{model_id_int:02d}"
+                        MODEL_TF = MODELS_DIR + "model"
+                        MODEL_NO_QUANT_TFLITE = (
+                            MODELS_DIR + f"{model_id}_model_no_quant.tflite"
+                        )
+                        MODEL_TFLITE = MODELS_DIR + f"{model_id}_model.tflite"
+                        MODEL_NO_QUANT_TFLITE_MICRO = (
+                            MODELS_DIR + f"{model_id}_model_no_quant.cc"
+                        )
+                        MODEL_TFLITE_MICRO = MODELS_DIR + f"{model_id}_model.cc"
+                        test_data = f"acels/data/{model_id}_test_coordinates.csv"
+                        quantized_output_path = (
+                            f"acels/predictions/{model_id}_quantized_predictions.csv"
+                        )
+                        non_quantized_output_path = (
+                            f"acels/predictions/{model_id}_non_quantized_predictions.csv"
+                        )
+                        model_mae = train_model(
+                            model_id=model_id,
+                            training_data=training_data_trm,
+                            model_path=MODEL_TF,
+                            activation=activation,
+                            optimizer=optimizer,
+                            patience=patience,
+                            epochs=epochs,
+                            batch_size=batch_size,
+                        )
+                        if model_mae <= 0.06:
+                            convert_model(
+                                model_id,
+                                MODEL_TF,
+                                MODEL_TFLITE,
+                                MODEL_TFLITE_MICRO,
+                                MODEL_NO_QUANT_TFLITE,
+                                MODEL_NO_QUANT_TFLITE_MICRO,
+                            )
 
-                    model_id_int += 1
+                        model_id_int += 1

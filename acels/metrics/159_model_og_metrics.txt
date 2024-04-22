@@ -1,20 +1,20 @@
 Model ID: 159
 
-Model: "sequential_56"
+Model: "sequential_7"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- dense_336 (Dense)           (None, 60)                540       
+ dense_42 (Dense)            (None, 60)                540       
                                                                  
- dense_337 (Dense)           (None, 80)                4880      
+ dense_43 (Dense)            (None, 80)                4880      
                                                                  
- dense_338 (Dense)           (None, 80)                6480      
+ dense_44 (Dense)            (None, 80)                6480      
                                                                  
- dense_339 (Dense)           (None, 60)                4860      
+ dense_45 (Dense)            (None, 60)                4860      
                                                                  
- dense_340 (Dense)           (None, 30)                1830      
+ dense_46 (Dense)            (None, 30)                1830      
                                                                  
- dense_341 (Dense)           (None, 3)                 93        
+ dense_47 (Dense)            (None, 3)                 93        
                                                                  
 =================================================================
 Total params: 18683 (72.98 KB)
@@ -22,24 +22,24 @@ Trainable params: 18683 (72.98 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 
-Layer: dense_336, Activation: tanh
-Layer: dense_337, Activation: tanh
-Layer: dense_338, Activation: tanh
-Layer: dense_339, Activation: tanh
-Layer: dense_340, Activation: tanh
-Layer: dense_341, Activation: linear
+Layer: dense_42, Activation: relu
+Layer: dense_43, Activation: relu
+Layer: dense_44, Activation: relu
+Layer: dense_45, Activation: relu
+Layer: dense_46, Activation: relu
+Layer: dense_47, Activation: linear
 
-Optimizer: Adamax
-Loss: <function mean_squared_error at 0x17f338ca0>
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x29c800ca0>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
-Epochs: 1459
+Epochs: 3000
 Batch Size: 32
-Patience: 150
+Patience: 500
 
 Model type: og
-# MAE: 0.07008475 mm
-# MSE: 0.08232332 mm²
-# RMSE: 0.28692040 mm
-# R²: 0.99876484 
+# MAE: 0.04111585 mm
+# MSE: 0.11018843 mm²
+# RMSE: 0.33194642 mm
+# R²: 0.99831925 

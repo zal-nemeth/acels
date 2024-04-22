@@ -1,0 +1,48 @@
+Model ID: 250
+
+Model: "sequential_56"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_392 (Dense)           (None, 60)                540       
+                                                                 
+ dense_393 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_394 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_395 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_396 (Dense)           (None, 60)                3660      
+                                                                 
+ dense_397 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_398 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 22343 (87.28 KB)
+Trainable params: 22343 (87.28 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_392, Activation: relu
+Layer: dense_393, Activation: relu
+Layer: dense_394, Activation: relu
+Layer: dense_395, Activation: relu
+Layer: dense_396, Activation: relu
+Layer: dense_397, Activation: relu
+Layer: dense_398, Activation: linear
+
+Optimizer: Adamax
+Loss: <function mean_squared_error at 0x16ff38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 496
+Batch Size: 64
+Patience: 50
+
+Model type: og
+# MAE: 0.15761798 mm
+# MSE: 0.11785628 mm²
+# RMSE: 0.34330202 mm
+# R²: 0.99832166 

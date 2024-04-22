@@ -1,20 +1,20 @@
 Model ID: 163
 
-Model: "sequential_60"
+Model: "sequential_11"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- dense_360 (Dense)           (None, 60)                540       
+ dense_66 (Dense)            (None, 60)                540       
                                                                  
- dense_361 (Dense)           (None, 80)                4880      
+ dense_67 (Dense)            (None, 80)                4880      
                                                                  
- dense_362 (Dense)           (None, 80)                6480      
+ dense_68 (Dense)            (None, 80)                6480      
                                                                  
- dense_363 (Dense)           (None, 60)                4860      
+ dense_69 (Dense)            (None, 60)                4860      
                                                                  
- dense_364 (Dense)           (None, 30)                1830      
+ dense_70 (Dense)            (None, 30)                1830      
                                                                  
- dense_365 (Dense)           (None, 3)                 93        
+ dense_71 (Dense)            (None, 3)                 93        
                                                                  
 =================================================================
 Total params: 18683 (72.98 KB)
@@ -22,24 +22,24 @@ Trainable params: 18683 (72.98 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 
-Layer: dense_360, Activation: hard_sigmoid
-Layer: dense_361, Activation: hard_sigmoid
-Layer: dense_362, Activation: hard_sigmoid
-Layer: dense_363, Activation: hard_sigmoid
-Layer: dense_364, Activation: hard_sigmoid
-Layer: dense_365, Activation: linear
+Layer: dense_66, Activation: softmax
+Layer: dense_67, Activation: softmax
+Layer: dense_68, Activation: softmax
+Layer: dense_69, Activation: softmax
+Layer: dense_70, Activation: softmax
+Layer: dense_71, Activation: linear
 
-Optimizer: Adamax
-Loss: <function mean_squared_error at 0x17f338ca0>
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x29c800ca0>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
 Epochs: 3000
 Batch Size: 32
-Patience: 150
+Patience: 500
 
 Model type: og
-# MAE: 0.27083515 mm
-# MSE: 0.23323420 mm²
-# RMSE: 0.48294326 mm
-# R²: 0.99608368 
+# MAE: 0.32988529 mm
+# MSE: 0.29239574 mm²
+# RMSE: 0.54073630 mm
+# R²: 0.99469973 

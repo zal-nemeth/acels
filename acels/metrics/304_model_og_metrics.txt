@@ -1,0 +1,45 @@
+Model ID: 304
+
+Model: "sequential_5"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_30 (Dense)            (None, 30)                270       
+                                                                 
+ dense_31 (Dense)            (None, 80)                2480      
+                                                                 
+ dense_32 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_33 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_34 (Dense)            (None, 30)                2430      
+                                                                 
+ dense_35 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 15013 (58.64 KB)
+Trainable params: 15013 (58.64 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_30, Activation: swish
+Layer: dense_31, Activation: swish
+Layer: dense_32, Activation: swish
+Layer: dense_33, Activation: swish
+Layer: dense_34, Activation: swish
+Layer: dense_35, Activation: linear
+
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x156a38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 707
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.11223824 mm
+# MSE: 0.03947625 mm²
+# RMSE: 0.19868631 mm
+# R²: 0.99932551 

@@ -1,0 +1,42 @@
+Model ID: 297
+
+Model: "sequential_33"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_165 (Dense)           (None, 60)                540       
+                                                                 
+ dense_166 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_167 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_168 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_169 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 12203 (47.67 KB)
+Trainable params: 12203 (47.67 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_165, Activation: swish
+Layer: dense_166, Activation: swish
+Layer: dense_167, Activation: swish
+Layer: dense_168, Activation: swish
+Layer: dense_169, Activation: linear
+
+Optimizer: SGD
+Loss: <function mean_squared_error at 0x2952c8ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 3000
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.44844442 mm
+# MSE: 0.56899027 mm²
+# RMSE: 0.75431443 mm
+# R²: 0.98881602 

@@ -1,0 +1,45 @@
+Model ID: 180
+
+Model: "sequential_28"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_168 (Dense)           (None, 60)                540       
+                                                                 
+ dense_169 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_170 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_171 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_172 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_173 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_168, Activation: relu
+Layer: dense_169, Activation: relu
+Layer: dense_170, Activation: relu
+Layer: dense_171, Activation: relu
+Layer: dense_172, Activation: relu
+Layer: dense_173, Activation: linear
+
+Optimizer: Adagrad
+Loss: <function mean_squared_error at 0x29c800ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 3000
+Batch Size: 32
+Patience: 500
+
+Model type: og
+# MAE: 0.74311456 mm
+# MSE: 1.84725542 mm²
+# RMSE: 1.35913775 mm
+# R²: 0.96983135 

@@ -1,0 +1,48 @@
+Model ID: 251
+
+Model: "sequential_57"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_399 (Dense)           (None, 60)                540       
+                                                                 
+ dense_400 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_401 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_402 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_403 (Dense)           (None, 60)                3660      
+                                                                 
+ dense_404 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_405 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 22343 (87.28 KB)
+Trainable params: 22343 (87.28 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_399, Activation: selu
+Layer: dense_400, Activation: selu
+Layer: dense_401, Activation: selu
+Layer: dense_402, Activation: selu
+Layer: dense_403, Activation: selu
+Layer: dense_404, Activation: selu
+Layer: dense_405, Activation: linear
+
+Optimizer: Adamax
+Loss: <function mean_squared_error at 0x16ff38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 443
+Batch Size: 64
+Patience: 50
+
+Model type: og
+# MAE: 0.34916156 mm
+# MSE: 0.29980472 mm²
+# RMSE: 0.54754426 mm
+# R²: 0.99497404 

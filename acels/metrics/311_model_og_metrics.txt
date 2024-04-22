@@ -1,0 +1,45 @@
+Model ID: 311
+
+Model: "sequential_12"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_72 (Dense)            (None, 30)                270       
+                                                                 
+ dense_73 (Dense)            (None, 80)                2480      
+                                                                 
+ dense_74 (Dense)            (None, 60)                4860      
+                                                                 
+ dense_75 (Dense)            (None, 80)                4880      
+                                                                 
+ dense_76 (Dense)            (None, 30)                2430      
+                                                                 
+ dense_77 (Dense)            (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 15013 (58.64 KB)
+Trainable params: 15013 (58.64 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_72, Activation: swish
+Layer: dense_73, Activation: swish
+Layer: dense_74, Activation: swish
+Layer: dense_75, Activation: swish
+Layer: dense_76, Activation: swish
+Layer: dense_77, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x156a38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 934
+Batch Size: 32
+Patience: 150
+
+Model type: og
+# MAE: 0.07799659 mm
+# MSE: 0.08112714 mm²
+# RMSE: 0.28482826 mm
+# R²: 0.99883588 

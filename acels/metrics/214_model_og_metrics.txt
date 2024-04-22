@@ -1,0 +1,48 @@
+Model ID: 214
+
+Model: "sequential_20"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_140 (Dense)           (None, 60)                540       
+                                                                 
+ dense_141 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_142 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_143 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_144 (Dense)           (None, 60)                3660      
+                                                                 
+ dense_145 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_146 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 22343 (87.28 KB)
+Trainable params: 22343 (87.28 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_140, Activation: hard_sigmoid
+Layer: dense_141, Activation: hard_sigmoid
+Layer: dense_142, Activation: hard_sigmoid
+Layer: dense_143, Activation: hard_sigmoid
+Layer: dense_144, Activation: hard_sigmoid
+Layer: dense_145, Activation: hard_sigmoid
+Layer: dense_146, Activation: linear
+
+Optimizer: Nadam
+Loss: <function mean_squared_error at 0x16ff38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 676
+Batch Size: 32
+Patience: 50
+
+Model type: og
+# MAE: 0.28661840 mm
+# MSE: 0.30111990 mm²
+# RMSE: 0.54874393 mm
+# R²: 0.99487145 

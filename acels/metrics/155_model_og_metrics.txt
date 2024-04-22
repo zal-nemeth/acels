@@ -1,20 +1,20 @@
 Model ID: 155
 
-Model: "sequential_52"
+Model: "sequential_3"
 _________________________________________________________________
  Layer (type)                Output Shape              Param #   
 =================================================================
- dense_312 (Dense)           (None, 60)                540       
+ dense_18 (Dense)            (None, 60)                540       
                                                                  
- dense_313 (Dense)           (None, 80)                4880      
+ dense_19 (Dense)            (None, 80)                4880      
                                                                  
- dense_314 (Dense)           (None, 80)                6480      
+ dense_20 (Dense)            (None, 80)                6480      
                                                                  
- dense_315 (Dense)           (None, 60)                4860      
+ dense_21 (Dense)            (None, 60)                4860      
                                                                  
- dense_316 (Dense)           (None, 30)                1830      
+ dense_22 (Dense)            (None, 30)                1830      
                                                                  
- dense_317 (Dense)           (None, 3)                 93        
+ dense_23 (Dense)            (None, 3)                 93        
                                                                  
 =================================================================
 Total params: 18683 (72.98 KB)
@@ -22,24 +22,24 @@ Trainable params: 18683 (72.98 KB)
 Non-trainable params: 0 (0.00 Byte)
 _________________________________________________________________
 
-Layer: dense_312, Activation: gelu
-Layer: dense_313, Activation: gelu
-Layer: dense_314, Activation: gelu
-Layer: dense_315, Activation: gelu
-Layer: dense_316, Activation: gelu
-Layer: dense_317, Activation: linear
+Layer: dense_18, Activation: sigmoid
+Layer: dense_19, Activation: sigmoid
+Layer: dense_20, Activation: sigmoid
+Layer: dense_21, Activation: sigmoid
+Layer: dense_22, Activation: sigmoid
+Layer: dense_23, Activation: linear
 
-Optimizer: Nadam
-Loss: <function mean_squared_error at 0x17f338ca0>
+Optimizer: RMSprop
+Loss: <function mean_squared_error at 0x29c800ca0>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
-Epochs: 604
+Epochs: 3000
 Batch Size: 32
-Patience: 150
+Patience: 500
 
 Model type: og
-# MAE: 0.07907605 mm
-# MSE: 0.05122804 mm²
-# RMSE: 0.22633612 mm
-# R²: 0.99927534 
+# MAE: 0.05122819 mm
+# MSE: 0.02419645 mm²
+# RMSE: 0.15555209 mm
+# R²: 0.99966159 
