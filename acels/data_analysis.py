@@ -106,11 +106,15 @@ def process_files(directory):
     for filename in os.listdir(directory):
         if filename.endswith("_og_metrics.txt"):
             model_id = filename.split("_")[0]
+            # print(model_id)
             filepath = os.path.join(directory, filename)
             activation, optimizer, patience, dataset_type = extract_og_metrics(filepath)
             models[model_id] = ModelInfo(
                 model_id, activation, optimizer, patience, dataset_type
             )
+            if model_id == "339":
+                print(patience)
+            
 
     # Process implementation metrics files
     for filename in os.listdir(directory):
@@ -132,6 +136,7 @@ def process_files(directory):
             else:  # This now correctly handles non_quant models
                 models[model_id].mae_non_quant = mae
                 models[model_id].runtime_non_quant = runtime
+
     return models
 
 
@@ -164,7 +169,7 @@ def create_and_save_tables(models):
 
     # Ensure correct handling for both quant and non-quant models
     for dataset_type in ["extended", "trimmed"]:
-        for patience in [50, 150]:
+        for patience in [50, 150, 200, 250]:
             for metric in ["MAE", "Runtime"]:
                 # Ensure we handle both quant and non-quant correctly by specifying the correct column names
                 for model_type in ["Quant", "Non Quant"]:
@@ -228,4 +233,4 @@ if __name__ == "__main__":
     )
 
     models = process_files(directory)
-    create_and_save_tables(models)
+    # create_and_save_tables(models)

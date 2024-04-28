@@ -746,16 +746,16 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "347"
-    model_id_int = 347
-    epochs = 3000
+    model_id = "357"
+    model_id_int = 357
+    epochs = 5000
     batch_sizes = [32]#, 128, 200]
-    patiences = [250]
+    patiences = [500] * 100
     activations = [
         "relu",
         # "selu",
         "tanh",
-        "sigmoid",
+        # "sigmoid",
         # "softmax",
         # "swish",
         # "hard_sigmoid",
@@ -891,3 +891,6 @@ if __name__ == "__main__":
                             )
 
                         model_id_int += 1
+                        
+                        if model_mae <= 0.03:
+                            break
