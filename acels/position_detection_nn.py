@@ -746,26 +746,26 @@ if __name__ == "__main__":
     ###################################################
     #############    Define Parameters    #############
     ###################################################
-    model_id = "299"
-    model_id_int = 299
+    model_id = "347"
+    model_id_int = 347
     epochs = 3000
     batch_sizes = [32]#, 128, 200]
-    patiences = [150]
+    patiences = [250]
     activations = [
-        # "relu",
+        "relu",
         # "selu",
-        # "tanh",
+        "tanh",
         "sigmoid",
-        "softmax",
-        "swish",
-        "hard_sigmoid",
+        # "softmax",
+        # "swish",
+        # "hard_sigmoid",
         # "gelu",
         # "elu",
     ]
     optimizers = [
-        "RMSprop",
+        # "RMSprop",
         "adam",
-        # "nadam",
+        "nadam",
         # "adamax",
         # "adagrad",
         # "sgd",
@@ -880,7 +880,7 @@ if __name__ == "__main__":
                             epochs=epochs,
                             batch_size=batch_size,
                         )
-                        if model_mae <= 0.06:
+                        if model_mae <= 0.05:
                             convert_model(
                                 model_id,
                                 MODEL_TF,
