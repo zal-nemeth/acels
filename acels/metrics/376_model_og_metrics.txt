@@ -1,0 +1,45 @@
+Model ID: 376
+
+Model: "sequential_19"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_114 (Dense)           (None, 30)                270       
+                                                                 
+ dense_115 (Dense)           (None, 80)                2480      
+                                                                 
+ dense_116 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_117 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_118 (Dense)           (None, 30)                2430      
+                                                                 
+ dense_119 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 15013 (58.64 KB)
+Trainable params: 15013 (58.64 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_114, Activation: tanh
+Layer: dense_115, Activation: tanh
+Layer: dense_116, Activation: tanh
+Layer: dense_117, Activation: tanh
+Layer: dense_118, Activation: tanh
+Layer: dense_119, Activation: linear
+
+Optimizer: Nadam
+Loss: <function mean_squared_error at 0x282e38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 1112
+Batch Size: 32
+Patience: 500
+
+Model type: og
+# MAE: 0.05849874 mm
+# MSE: 0.04606638 mm²
+# RMSE: 0.21463080 mm
+# R²: 0.99935398 
