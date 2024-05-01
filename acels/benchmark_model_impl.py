@@ -172,7 +172,7 @@ def compare_datasets(model_id, model_type, original_csv, predicted_csv, existing
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "141"
+    model_id = "524"
     data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"
