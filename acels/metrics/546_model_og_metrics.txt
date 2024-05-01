@@ -1,0 +1,45 @@
+Model ID: 546
+
+Model: "sequential_164"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #   
+=================================================================
+ dense_984 (Dense)           (None, 60)                540       
+                                                                 
+ dense_985 (Dense)           (None, 80)                4880      
+                                                                 
+ dense_986 (Dense)           (None, 80)                6480      
+                                                                 
+ dense_987 (Dense)           (None, 60)                4860      
+                                                                 
+ dense_988 (Dense)           (None, 30)                1830      
+                                                                 
+ dense_989 (Dense)           (None, 3)                 93        
+                                                                 
+=================================================================
+Total params: 18683 (72.98 KB)
+Trainable params: 18683 (72.98 KB)
+Non-trainable params: 0 (0.00 Byte)
+_________________________________________________________________
+
+Layer: dense_984, Activation: tanh
+Layer: dense_985, Activation: tanh
+Layer: dense_986, Activation: tanh
+Layer: dense_987, Activation: tanh
+Layer: dense_988, Activation: tanh
+Layer: dense_989, Activation: linear
+
+Optimizer: Adam
+Loss: <function mean_squared_error at 0x157e38ca0>
+Metrics: ['loss', 'mae']
+
+Dataset: trimmed
+Epochs: 2618
+Batch Size: 32
+Patience: 500
+
+Model type: og
+# MAE: 0.02886428 mm
+# MSE: 0.01401639 mm²
+# RMSE: 0.11839083 mm
+# R²: 0.99980093 
