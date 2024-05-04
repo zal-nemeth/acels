@@ -30,16 +30,16 @@ Layer: dense_46, Activation: tanh
 Layer: dense_47, Activation: linear
 
 Optimizer: Nadam
-Loss: <function mean_squared_error at 0x282e38ca0>
+Loss: <function mean_squared_error at 0x7f6673d08430>
 Metrics: ['loss', 'mae']
 
 Dataset: trimmed
-Epochs: 1353
+Epochs: 2240
 Batch Size: 32
 Patience: 500
 
 Model type: og
-# MAE: 0.04797933 mm
-# MSE: 0.02011595 mm²
-# RMSE: 0.14183071 mm
-# R²: 0.99967896 
+# MAE: 0.03443645 mm
+# MSE: 0.01325941 mm²
+# RMSE: 0.11514950 mm
+# R²: 0.99981442 
