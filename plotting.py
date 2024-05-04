@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 # Data
 data = {
@@ -67,6 +67,7 @@ categories = df.index.tolist()  # Activation functions
 n_categories = len(categories)
 bar_width = 0.2
 index = np.arange(n_categories)
+
 
 # Function to extract data for plotting
 def extract_data_for_plot(metric):

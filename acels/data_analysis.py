@@ -114,7 +114,6 @@ def process_files(directory):
             )
             if model_id == "339":
                 print(patience)
-            
 
     # Process implementation metrics files
     for filename in os.listdir(directory):

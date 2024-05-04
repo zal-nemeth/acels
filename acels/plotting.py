@@ -48,9 +48,9 @@
 # create_svg_from_csv(csv_file, title)
 
 
-import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # Load data
 mae_non_quant = pd.read_csv("acels/analysis/extended_50_mae_non_quant_models.csv")
@@ -60,8 +60,8 @@ runtime_non_quant = pd.read_csv(
 )
 runtime_quant = pd.read_csv("acels/analysis/extended_50_runtime_quant_models.csv")
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 
 def load_and_prepare_data(csv_path, quantized=False):
@@ -126,7 +126,10 @@ def extract_data_for_plot(metric_type):
     data_quant = [
         np.array(quant_data[f"Quant {optimizer}"])
         # for optimizer in ["Adam", "Adamax", "Nadam", "RMSprop"]
-        for optimizer in ["Adam", "Nadam",]
+        for optimizer in [
+            "Adam",
+            "Nadam",
+        ]
     ]
 
     return data_non_quant, data_quant
@@ -239,9 +242,10 @@ def plot_combined_v0(metric_types):
                 label=f"Quant {optimizer}" if metric_index == 0 else "",
                 alpha=0.5,
             )
-            colors[f"Non-Quant {optimizer}"] = mcolors.to_hex(non_quant_bar[0].get_facecolor())
+            colors[f"Non-Quant {optimizer}"] = mcolors.to_hex(
+                non_quant_bar[0].get_facecolor()
+            )
             colors[f"Quant {optimizer}"] = mcolors.to_hex(quant_bar[0].get_facecolor())
-
 
         axs[metric_index].set_ylabel(metric_type)
         axs[metric_index].set_title(
@@ -258,6 +262,7 @@ def plot_combined_v0(metric_types):
 
     return colors
 
+
 def plot_combined(metric_types):
     fig, axs = plt.subplots(2, 1, figsize=(10, 10), sharex=True)
     categories = ["sigmoid", "swish", "tanh"]
@@ -268,8 +273,18 @@ def plot_combined(metric_types):
     # Predefined colors for each bar type
     # colors = {'Non-Quant Adam': '#8fbbda', 'Quant Adam': '#ffbf86', 'Non-Quant Adamax': '#96d096', 'Quant Adamax': '#ea9394', 'Non-Quant Nadam': '#cab3de', 'Quant Nadam': '#c6aaa5', 'Non-Quant RMSprop': '#f1bbe0', 'Quant RMSprop': '#bfbfbf'}
     # colors = {'Non-Quant Adam': '#79add2', 'Quant Adam': '#ffb26e', 'Non-Quant Adamax': '#80c680', 'Quant Adamax': '#e67d7e', 'Non-Quant Nadam': '#bfa4d7', 'Quant Nadam': '#ba9a93', 'Non-Quant RMSprop': '#eeadda', 'Quant RMSprop': '#b2b2b2'}
-    colors = {'Non-Quant Adam': '#8fbbda', 'Quant Adam': '#ffbf86', 'Non-Quant Nadam': '#cab3de', 'Quant Nadam': '#c6aaa5'}
-    colors = {'Non-Quant Adam': '#79add2', 'Quant Adam': '#ffb26e', 'Non-Quant Nadam': '#bfa4d7', 'Quant Nadam': '#ba9a93'}
+    colors = {
+        "Non-Quant Adam": "#8fbbda",
+        "Quant Adam": "#ffbf86",
+        "Non-Quant Nadam": "#cab3de",
+        "Quant Nadam": "#c6aaa5",
+    }
+    colors = {
+        "Non-Quant Adam": "#79add2",
+        "Quant Adam": "#ffb26e",
+        "Non-Quant Nadam": "#bfa4d7",
+        "Quant Nadam": "#ba9a93",
+    }
     for metric_index, metric_type in enumerate(metric_types):
         data_non_quant, data_quant = extract_data_for_plot(metric_type)
         plotted_labels = set()
@@ -293,17 +308,21 @@ def plot_combined(metric_types):
                         index[j] + i * bar_width,
                         non_quant_value,
                         bar_width,
-                        label=non_quant_label if non_quant_label not in plotted_labels else "",
-                        color=colors[f'Non-Quant {optimizer}'],
-                        alpha=1
+                        label=(
+                            non_quant_label
+                            if non_quant_label not in plotted_labels
+                            else ""
+                        ),
+                        color=colors[f"Non-Quant {optimizer}"],
+                        alpha=1,
                     )
                     axs[metric_index].bar(
                         index[j] + i * bar_width,
                         quant_value,
                         bar_width,
                         label=quant_label if quant_label not in plotted_labels else "",
-                        color=colors[f'Quant {optimizer}'],
-                        alpha=1
+                        color=colors[f"Quant {optimizer}"],
+                        alpha=1,
                     )
                 else:
                     axs[metric_index].bar(
@@ -311,16 +330,20 @@ def plot_combined(metric_types):
                         quant_value,
                         bar_width,
                         label=quant_label if quant_label not in plotted_labels else "",
-                        color=colors[f'Quant {optimizer}'],
-                        alpha=1
+                        color=colors[f"Quant {optimizer}"],
+                        alpha=1,
                     )
                     axs[metric_index].bar(
                         index[j] + i * bar_width,
                         non_quant_value,
                         bar_width,
-                        label=non_quant_label if non_quant_label not in plotted_labels else "",
-                        color=colors[f'Non-Quant {optimizer}'],
-                        alpha=1
+                        label=(
+                            non_quant_label
+                            if non_quant_label not in plotted_labels
+                            else ""
+                        ),
+                        color=colors[f"Non-Quant {optimizer}"],
+                        alpha=1,
                     )
 
                 # Mark these labels as plotted to avoid duplicate legend entries
@@ -330,8 +353,10 @@ def plot_combined(metric_types):
             axs[metric_index].set_ylabel(f"{metric_type} (mm)")
         else:
             axs[metric_index].set_ylabel(f"{metric_type} (μs)")
-            
-        axs[metric_index].set_title(f"{metric_type} by Activation Function and Optimizer Type")
+
+        axs[metric_index].set_title(
+            f"{metric_type} by Activation Function and Optimizer Type"
+        )
         axs[metric_index].set_xticks(index + bar_width * n_categories / 2.65)
         axs[metric_index].set_xticklabels(categories)
 
@@ -342,6 +367,7 @@ def plot_combined(metric_types):
     plt.show()
 
     return colors
+
 
 # Plot both MAE and Runtime on the same figure
 colours_used = plot_combined(["MAE", "Runtime"])
@@ -389,10 +415,10 @@ print(colours_used)
 #     cell_text = dataframe.values
 #     col_labels = ['Activation'] + dataframe.columns.tolist()
 #     row_labels = dataframe.index.tolist()
-    
+
 #     # Create an array including the row labels as the first column of cell_text
 #     full_cell_text = [[row_label] + list(row) for row_label, row in zip(row_labels, cell_text)]
-    
+
 #     # Table added to plot with adjusted row labels and headers
 #     table = ax.table(
 #         cellText=full_cell_text,
@@ -400,7 +426,7 @@ print(colours_used)
 #         loc='center',
 #         cellLoc='center'
 #     )
-    
+
 #     # Adjust layout to make room for table
 #     fig.tight_layout()
 #     # Save the table as an SVG file
@@ -444,10 +470,10 @@ print(colours_used)
 #     cell_text = dataframe.values
 #     col_labels = ['Activation'] + dataframe.columns.tolist()
 #     row_labels = dataframe.index.tolist()
-    
+
 #     # Create an array including the row labels as the first column of cell_text
 #     full_cell_text = [[row_label] + list(row) for row_label, row in zip(row_labels, cell_text)]
-    
+
 #     # Table added to plot with adjusted row labels and headers
 #     table = ax.table(
 #         cellText=full_cell_text,
@@ -455,7 +481,7 @@ print(colours_used)
 #         loc='center',
 #         cellLoc='center'
 #     )
-    
+
 #     # Adjust layout to make room for table
 #     fig.tight_layout()
 #     # Save the table as an SVG file
@@ -486,7 +512,7 @@ print(colours_used)
 # for file in files:
 #     print(f"Displaying data for: {file}")
 #     load_and_display_data(file)
-    
+
 # def save_data_as_svg(dataframe, filename):
 #     # Create a plot object with dataframe data
 #     fig, ax = plt.subplots()

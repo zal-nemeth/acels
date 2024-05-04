@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras import Sequential
-from keras.callbacks import EarlyStopping, ModelCheckpoint, Callback
+from keras.callbacks import Callback, EarlyStopping, ModelCheckpoint
 from keras.layers import Dense
 from keras.models import load_model
 
@@ -148,7 +148,8 @@ class PredictionCallback(Callback):
     def on_epoch_end(self, epoch, logs=None):
         predictions = self.model.predict(self.feature_data)
         # Save predictions to a file, appending the epoch number to the filename
-        np.save(f'model_predictions/{self.filepath}_epoch_{epoch+1}.npy', predictions)
+        np.save(f"model_predictions/{self.filepath}_epoch_{epoch+1}.npy", predictions)
+
 
 # -----------------------------------------------------------------------------
 # Model definition and training
@@ -267,8 +268,10 @@ def train_model(
         mode="min",
         verbose=1,
     )
-    
-    predictions_saver = PredictionCallback(feature_validate, target_validate, 'model_predictions')
+
+    predictions_saver = PredictionCallback(
+        feature_validate, target_validate, "model_predictions"
+    )
 
     # -----------------------------------------------------------------------------
     # Model Building
@@ -473,7 +476,13 @@ def train_model(
     # Normalized model predictions plot
     axs[0].scatter3D(norm_x, norm_y, norm_z, c="#1f77b4", s=15, label="Actual Values")
     axs[0].scatter3D(
-        norm_x2, norm_y2, norm_z2, c="#d62728", s=6, alpha=0.5, label="Model Predictions"
+        norm_x2,
+        norm_y2,
+        norm_z2,
+        c="#d62728",
+        s=6,
+        alpha=0.5,
+        label="Model Predictions",
     )
     axs[0].set_title("Normalized Model Predictions")
     axs[0].set_xlabel("X")
@@ -749,26 +758,26 @@ if __name__ == "__main__":
     model_id = "357"
     model_id_int = 357
     epochs = 5000
-    batch_sizes = [32]#, 128, 200]
-    patiences = [500] * 100
+    batch_sizes = [32, 64]
+    patiences = [25, 50, 100, 250, 500]
     activations = [
         "relu",
-        # "selu",
+        "selu",
         "tanh",
-        # "sigmoid",
-        # "softmax",
-        # "swish",
-        # "hard_sigmoid",
+        "sigmoid",
+        "softmax",
+        "swish",
+        "hard_sigmoid",
         # "gelu",
         # "elu",
     ]
     optimizers = [
-        # "RMSprop",
+        "RMSprop",
         "adam",
         "nadam",
-        # "adamax",
-        # "adagrad",
-        # "sgd",
+        "adamax",
+        "adagrad",
+        "sgd",
     ]
     ###################################################
     ###################################################
@@ -867,9 +876,7 @@ if __name__ == "__main__":
                         quantized_output_path = (
                             f"acels/predictions/{model_id}_quantized_predictions.csv"
                         )
-                        non_quantized_output_path = (
-                            f"acels/predictions/{model_id}_non_quantized_predictions.csv"
-                        )
+                        non_quantized_output_path = f"acels/predictions/{model_id}_non_quantized_predictions.csv"
                         model_mae = train_model(
                             model_id=model_id,
                             training_data=training_data_trm,
@@ -891,6 +898,6 @@ if __name__ == "__main__":
                             )
 
                         model_id_int += 1
-                        
+
                         if model_mae <= 0.03:
                             break
