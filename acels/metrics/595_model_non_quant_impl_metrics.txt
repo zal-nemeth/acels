@@ -1,0 +1,15 @@
+Model type: non_quant_impl
+Model ID: 595
+# MAE: 0.03082657 mm
+# MSE: 0.01376658 mm²
+# RMSE: 0.11733106 mm
+# R²: 0.99980375 
+# Average Runtime: 695.31920649 us
+
+Model type: non_quant_impl
+Model ID: 595
+# MAE: 0.03082657 mm
+# MSE: 0.01376658 mm²
+# RMSE: 0.11733106 mm
+# R²: 0.99980375 
+# Average Runtime: 1133.77547340 us

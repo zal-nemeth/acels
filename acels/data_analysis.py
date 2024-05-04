@@ -169,7 +169,7 @@ def create_and_save_tables(models):
 
     # Ensure correct handling for both quant and non-quant models
     for dataset_type in ["extended", "trimmed"]:
-        for patience in [50, 150, 200, 250]:
+        for patience in [50, 150, 200, 250, 500]:
             for metric in ["MAE", "Runtime"]:
                 # Ensure we handle both quant and non-quant correctly by specifying the correct column names
                 for model_type in ["Quant", "Non Quant"]:
@@ -233,4 +233,4 @@ if __name__ == "__main__":
     )
 
     models = process_files(directory)
-    # create_and_save_tables(models)
+    create_and_save_tables(models)

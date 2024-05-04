@@ -4,7 +4,7 @@ from acels.benchmark_model_impl import compare_datasets
 # Main
 # -------------------------------------------------------------------------------------------
 if __name__ == "__main__":
-    model_id = "524"
+    model_id = "597"
     data_exists = False
 
     original_csv_path = f"acels/data/{model_id}_test_coordinates.csv"

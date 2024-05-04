@@ -6,5 +6,5 @@ Model ID: 30, MAE: 0.07557162, Runtime: 514.21864836 us
 Model ID: 21, MAE: 0.05243826, Runtime: 514.23021323 us
 Model ID: 75, MAE: 0.04155885, Runtime: 514.33501988 us
 Model ID: 12, MAE: 0.06910252, Runtime: 515.04228406 us
+Model ID: 524, MAE: 0.0295251, Runtime: 583.0748422 us
 Model ID: 78, MAE: 0.03078183, Runtime: 626.26563065 us
-Model ID: 15, MAE: 0.0559788, Runtime: 631.26129382 us

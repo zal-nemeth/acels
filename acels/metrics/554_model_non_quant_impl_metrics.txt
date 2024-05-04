@@ -1,0 +1,15 @@
+Model type: non_quant_impl
+Model ID: 554
+# MAE: 0.03280433 mm
+# MSE: 0.06398311 mm²
+# RMSE: 0.25294882 mm
+# R²: 0.99912638 
+# Average Runtime: 694.33273219 us
+
+Model type: non_quant_impl
+Model ID: 554
+# MAE: 0.03280433 mm
+# MSE: 0.06398311 mm²
+# RMSE: 0.25294882 mm
+# R²: 0.99912638 
+# Average Runtime: 1113.43282236 us
